@@ -1,4 +1,5 @@
-﻿
+﻿ 
+
 namespace WAConectorAPI.Models.ModelCliente
 {
     using System;
@@ -10,13 +11,12 @@ namespace WAConectorAPI.Models.ModelCliente
     [Table("BitacoraErrores")]
     public partial class BitacoraErrores
     {
+        [Key]
         public int id { get; set; }
-
+        public string DocNum { get; set; }
+        public string Type { get; set; }
         public string Descripcion { get; set; }
-
         public string StackTrace { get; set; }
-
         public DateTime Fecha { get; set; }
-
     }
 }

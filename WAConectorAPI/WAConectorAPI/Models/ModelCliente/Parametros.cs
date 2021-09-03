@@ -1,4 +1,4 @@
-﻿ 
+﻿
 namespace WAConectorAPI.Models.ModelCliente
 {
     using System;
@@ -10,13 +10,26 @@ namespace WAConectorAPI.Models.ModelCliente
     [Table("Parametros")]
     public partial class Parametros
     {
+        [Key]
         public int id { get; set; }
-        public string APP_KEY { get; set; }
-        public string APP_TOKEN { get; set; }
-        public string urlOrdenesVTEX { get; set; }
-        public string urlOrdenVTEX { get; set; }
-        public string urlInventarioActualizar { get; set; }
-        public string urlTomarSKU { get; set; }
-        public string urlActualizarPrecio { get; set; }
+        public string FETEEnc { get; set; }
+        public string FETEDet { get; set; }
+        public string NCEnc { get; set; }
+        public string NCDet { get; set; }
+        public string FECEnc { get; set; }
+        public string FECDet { get; set; }
+        public string Exoneracion { get; set; }
+        public string UbicacionCliente { get; set; }
+        public string SerieFE { get; set; }
+        public string SerieTE { get; set; }
+        public string SerieNC { get; set; }
+        public string SerieND { get; set; }
+        public string SerieFEC { get; set; }
+        public string SerieFEE { get; set; }
+        public string urlCyber { get; set; }
+        public string urlCyberRespHacienda { get; set; }
+        public string CampoConsecutivo { get; set; }
+        public string CampoClave { get; set; }
+        public string CampoEstado { get; set; }
     }
 }
