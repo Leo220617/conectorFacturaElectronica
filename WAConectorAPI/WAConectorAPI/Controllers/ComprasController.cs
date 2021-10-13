@@ -52,7 +52,7 @@ namespace WAConectorAPI.Controllers
 
               
 
-                var Factura = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento).FirstOrDefault();
+                var Factura = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento && a.code == 1 && a.RespuestaHacienda.Contains("aprobado")).FirstOrDefault();
 
                 if (Factura == null)
                 {

@@ -126,7 +126,50 @@ namespace WAConectorAPI.Controllers
                     var DocEntry = Ds.Tables["Encabezado"].Rows[0]["DocEntry"].ToString();
                     //Se toma el docentry del encabezado en la consulta
                     enc.DocEntry = DocEntry;
-                    enc.consecutivoInterno = consecInterno; //Se toma el consecutivo  dependiendo el documento electronico a generar
+                    //Preguntaremos si ya existe un documento creado con status != 1 y que el consecutivo de hacienda sea diferente de null
+                    var Busqueda = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento && a.code != 1 ).FirstOrDefault();
+                    if (Busqueda == null)
+                    {
+                        enc.consecutivoInterno = consecInterno; //Se toma el consecutivo  dependiendo el documento electronico a generar
+                    }
+                    else // No se genera un consecutivo nuevo por lo tanto no deberia de generar una sumatoria a la tabla de sucursales
+                    {
+                        switch(tipoDocumento)
+                        {
+                            case "01":
+                                {
+                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                    Sucursal.consecFac--;
+                                    db.SaveChanges();
+                                    break;
+                                }
+                            case "02":
+                                {
+                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                    Sucursal.consecND--;
+                                    db.SaveChanges();
+                                    break;
+                                }
+                            case "03":
+                                {
+                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                    Sucursal.consecNC--;
+                                    db.SaveChanges();
+                                    break;
+                                }
+                            case "04":
+                                {
+                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                    Sucursal.consecTiq--;
+                                    db.SaveChanges();
+                                    break;
+                                }
+                        }
+                        enc.consecutivoInterno = Busqueda.consecutivoInterno; //Se toma el consecutivo  dependiendo el documento electronico a generar
+                    }
+
+
+                    
                     enc.TipoDocumento = tipoDocumento; //Tipo de documento a generar dependiendo la serie
                     enc.Fecha = Convert.ToDateTime(Ds.Tables["Encabezado"].Rows[0]["DocDate"]); // Se toma la fecha del comprobante y se le pone la hora actual
                     enc.Fecha = enc.Fecha.Value.AddHours(DateTime.Now.Hour);
@@ -137,7 +180,7 @@ namespace WAConectorAPI.Controllers
                     enc.LicTradNum = Ds.Tables["Encabezado"].Rows[0]["Identificacion"].ToString();
                     enc.LicTradNum = enc.LicTradNum.Replace("-", "");
                     enc.Email = Ds.Tables["Encabezado"].Rows[0]["Correo"].ToString();
-                    enc.CodActividadEconomica = Sucursal.CodActividadComercial;
+                    enc.CodActividadEconomica = Ds.Tables["Encabezado"].Rows[0]["ActividadEconomicaEmisor"].ToString();//Sucursal.CodActividadComercial;
 
                     if (enc.LicTradNum.Length == 9)
                     {
@@ -571,49 +614,102 @@ namespace WAConectorAPI.Controllers
                     if (enc.TipoDocumento == "03") //Si es nota de credito
                     {
 
-                        var Encabezado = db.EncDocumento.Where(a => a.consecutivoSAP == enc.RefNumeroDocumento).FirstOrDefault();
-                        enc.RefTipoDocumento = Encabezado.TipoDocumento;
-                        enc.RefFechaEmision = Encabezado.Fecha.Value;
+                        var Encabezado = db.EncDocumento.Where(a => a.consecutivoSAP == enc.RefNumeroDocumento && !string.IsNullOrEmpty(a.ClaveHacienda)).FirstOrDefault();
 
-                        try
+                        if(Encabezado != null)
                         {
-                            if(string.IsNullOrEmpty(enc.RefRazon))
-                            {
+                            enc.RefTipoDocumento = Encabezado.TipoDocumento;
+                            enc.RefFechaEmision = Encabezado.Fecha.Value;
 
-                                if (Math.Abs((decimal)(enc.totalcomprobante - Encabezado.totalcomprobante)) < 1)
+                            try
+                            {
+                                if (string.IsNullOrEmpty(enc.RefRazon))
                                 {
-                                    enc.RefCodigo = "01";
-                                    enc.RefRazon = $"Anula documento electrónico { Encabezado.ClaveHacienda}";
+
+                                    if (Math.Abs((decimal)(enc.totalcomprobante - Encabezado.totalcomprobante)) < 1)
+                                    {
+                                        enc.RefCodigo = "01";
+                                        enc.RefRazon = $"Anula documento electrónico { Encabezado.ClaveHacienda}";
+                                    }
+                                    else
+                                    {
+                                        enc.RefCodigo = "02";
+                                        enc.RefRazon = $"Corrige monto documento electrónico { Encabezado.ClaveHacienda}";
+                                    }
                                 }
                                 else
                                 {
-                                    enc.RefCodigo = "02";
-                                    enc.RefRazon = $"Corrige monto documento electrónico { Encabezado.ClaveHacienda}";
-                                }
-                            }
-                            else
-                            {
-                                if (Math.Abs((decimal)(enc.totalcomprobante - Encabezado.totalcomprobante)) < 1)
-                                {
-                                    enc.RefCodigo = "01";
-                                     
-                                }
-                                else
-                                {
-                                    enc.RefCodigo = "02";
-                                     
-                                }
-                            }
-                          
+                                    if (Math.Abs((decimal)(enc.totalcomprobante - Encabezado.totalcomprobante)) < 1)
+                                    {
+                                        enc.RefCodigo = "01";
 
+                                    }
+                                    else
+                                    {
+                                        enc.RefCodigo = "02";
+
+                                    }
+                                }
+
+                                enc.RefNumeroDocumento = Encabezado.ClaveHacienda;
+
+
+
+                            }
+                            catch (Exception pp)
+                            {
+                                enc.RefCodigo = "01";
+                                enc.RefRazon = $"Anula documento electrónico { Encabezado.ClaveHacienda}";
+
+                            }
+                        }
+                        else
+                        {
+                            var DocEntry1 = enc.RefNumeroDocumento;
+                            SQL = parametros.FETEEnc + enc.RefNumeroDocumento + " ";
+                            SqlConnection CnR = new SqlConnection(conexion);
+                            SqlCommand CmdR = new SqlCommand(SQL, CnR);
+                            SqlDataAdapter DaR = new SqlDataAdapter(CmdR);
+                            DataSet DsR = new DataSet();
+                            CnR.Open();
+                            DaR.Fill(DsR, "RefEnc");
+                            enc.RefTipoDocumento = "01";
+                            try
+                            {
+                                enc.RefFechaEmision = Convert.ToDateTime(DsR.Tables["RefEnc"].Rows[0]["DocDate"]);
+                            }
+                            catch (Exception)
+                            {
+
+                                 
+                            }
+
+                           
+                            try
+                            {
+                                enc.RefNumeroDocumento = Convert.ToString(DsR.Tables["RefEnc"].Rows[0]["ClaveHacienda"]);
+                            }
+                            catch (Exception ex)
+                            {
+
+                                BitacoraErrores be = new BitacoraErrores();
+                                be.DocNum = DocNum;
+                                be.Type = ObjType;
+                                be.Descripcion = ex.Message;
+                                be.StackTrace = ex.StackTrace;
+                                be.Fecha = DateTime.Now;
+                                db.BitacoraErrores.Add(be);
+                                db.SaveChanges();
+                            }
                             
-                        }
-                        catch (Exception pp)
-                        {
-                            enc.RefCodigo = "01";
-                            enc.RefRazon = $"Anula documento electrónico { Encabezado.ClaveHacienda}";
+                             enc.RefCodigo = "01";
+                           enc.RefRazon = $"Anula documento electrónico { enc.RefNumeroDocumento}";
 
+                           
+
+                            CnR.Close();
                         }
+                        
 
                     }
 
@@ -622,49 +718,52 @@ namespace WAConectorAPI.Controllers
                     if (enc.TipoDocumento == "02") //Si es nota de debito
                     {
 
-                        var Encabezado = db.EncDocumento.Where(a => a.consecutivoSAP == enc.RefNumeroDocumento).FirstOrDefault();
-                        enc.RefTipoDocumento = Encabezado.TipoDocumento;
-                        enc.RefFechaEmision = Encabezado.Fecha.Value;
+                        var Encabezado = db.EncDocumento.Where(a => a.consecutivoSAP == enc.RefNumeroDocumento && !string.IsNullOrEmpty(a.ClaveHacienda)).FirstOrDefault();
+                        
+                            enc.RefTipoDocumento = Encabezado.TipoDocumento;
+                            enc.RefFechaEmision = Encabezado.Fecha.Value;
 
-                        try
-                        {
-                            if (string.IsNullOrEmpty(enc.RefRazon))
+                            try
                             {
-
-                                if (Math.Abs((decimal)(enc.totalcomprobante - Encabezado.totalcomprobante)) < 1)
+                                if (string.IsNullOrEmpty(enc.RefRazon))
                                 {
-                                    enc.RefCodigo = "01";
-                                    enc.RefRazon = $"Anula documento electrónico { Encabezado.ClaveHacienda}";
+
+                                    if (Math.Abs((decimal)(enc.totalcomprobante - Encabezado.totalcomprobante)) < 1)
+                                    {
+                                        enc.RefCodigo = "01";
+                                        enc.RefRazon = $"Anula documento electrónico { Encabezado.ClaveHacienda}";
+                                    }
+                                    else
+                                    {
+                                        enc.RefCodigo = "02";
+                                        enc.RefRazon = $"Corrige monto documento electrónico { Encabezado.ClaveHacienda}";
+                                    }
                                 }
                                 else
                                 {
-                                    enc.RefCodigo = "02";
-                                    enc.RefRazon = $"Corrige monto documento electrónico { Encabezado.ClaveHacienda}";
+                                    if (Math.Abs((decimal)(enc.totalcomprobante - Encabezado.totalcomprobante)) < 1)
+                                    {
+                                        enc.RefCodigo = "01";
+
+                                    }
+                                    else
+                                    {
+                                        enc.RefCodigo = "02";
+
+                                    }
                                 }
-                            }
-                            else
+
+                            enc.RefNumeroDocumento = Encabezado.ClaveHacienda;
+
+                        }
+                            catch (Exception pp)
                             {
-                                if (Math.Abs((decimal)(enc.totalcomprobante - Encabezado.totalcomprobante)) < 1)
-                                {
-                                    enc.RefCodigo = "01";
+                                enc.RefCodigo = "01";
+                                enc.RefRazon = $"Anula documento electrónico { Encabezado.ClaveHacienda}";
 
-                                }
-                                else
-                                {
-                                    enc.RefCodigo = "02";
-
-                                }
                             }
-
-
-
-                        }
-                        catch (Exception pp)
-                        {
-                            enc.RefCodigo = "01";
-                            enc.RefRazon = $"Anula documento electrónico { Encabezado.ClaveHacienda}";
-
-                        }
+                         
+                       
 
                     }
 
@@ -978,7 +1077,7 @@ namespace WAConectorAPI.Controllers
             {
                 var Documentos = db.EncDocumento.Where(a => a.RespuestaHacienda.ToLower().Contains("procesando") ).ToList();
                 var Documentos1 = db.EncDocumento.Where(a =>   a.sincronizadaSAP == false).ToList();
-
+                
                 var parametros = db.Parametros.FirstOrDefault();
                 Metodos metodo = new Metodos();
 
@@ -1083,16 +1182,17 @@ namespace WAConectorAPI.Controllers
                                 if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
                                 {
 
-                                    Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'A'  where DocEntry = '" + item.DocEntry + "' ";
+                                    Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
 
                                 }
                                 else if (item.TipoDocumento == "03")
                                 {
-                                    Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'A'  where DocEntry = '" + item.DocEntry + "' ";
+                                    Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
 
-                                }else if(item.TipoDocumento == "08")
+                                }
+                                else if (item.TipoDocumento == "08")
                                 {
-                                    Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'A'  where DocEntry = '" + item.DocEntry + "' ";
+                                    Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
                                 }
 
                                 Cmd5.ExecuteNonQuery();
@@ -1112,17 +1212,17 @@ namespace WAConectorAPI.Controllers
                                 if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
                                 {
 
-                                    Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'R'  where DocEntry = '" + item.DocEntry + "' ";
+                                    Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
 
                                 }
                                 else if (item.TipoDocumento == "03")
                                 {
-                                    Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'R'  where DocEntry = '" + item.DocEntry + "' ";
+                                    Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
 
                                 }
                                 else if (item.TipoDocumento == "08")
                                 {
-                                    Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'R'  where DocEntry = '" + item.DocEntry + "' ";
+                                    Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
                                 }
 
                                 Cmd5.ExecuteNonQuery();
@@ -1146,6 +1246,8 @@ namespace WAConectorAPI.Controllers
                 }
 
 
+
+
                 return Request.CreateResponse(HttpStatusCode.OK);
 
             }
@@ -1160,6 +1262,7 @@ namespace WAConectorAPI.Controllers
         [HttpPost]
         public async System.Threading.Tasks.Task<HttpResponseMessage> PostAsync([FromBody] data datos)
         {
+
             try
             {
 
@@ -1181,17 +1284,17 @@ namespace WAConectorAPI.Controllers
                         if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
                         {
 
-                            Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'A'  where DocEntry = '" + item.DocEntry + "' ";
+                            Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda  + "'  where DocEntry = '" + item.DocEntry + "' ";
 
                         }
                         else if (item.TipoDocumento == "03")
                         {
-                            Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'A'  where DocEntry = '" + item.DocEntry + "' ";
+                            Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
 
                         }
                         else if (item.TipoDocumento == "08")
                         {
-                            Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'A'  where DocEntry = '" + item.DocEntry + "' ";
+                            Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
                         }
 
                         Cmd5.ExecuteNonQuery();
@@ -1210,17 +1313,17 @@ namespace WAConectorAPI.Controllers
                         if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
                         {
 
-                            Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'R'  where DocEntry = '" + item.DocEntry + "' ";
+                            Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
 
                         }
                         else if (item.TipoDocumento == "03")
                         {
-                            Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'R'  where DocEntry = '" + item.DocEntry + "' ";
+                            Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
 
                         }
                         else if (item.TipoDocumento == "08")
                         {
-                            Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'R'  where DocEntry = '" + item.DocEntry + "' ";
+                            Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
                         }
 
                         Cmd5.ExecuteNonQuery();
