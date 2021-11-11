@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Web;
 using WAConectorAPI.Models;
+ 
 using WAConectorAPI.Models.ModelCliente;
 
 namespace WAConectorAPI.Controllers
@@ -426,6 +427,9 @@ namespace WAConectorAPI.Controllers
            
 
         }
+
+
+         
 
         public string GeneraNumero(int cant = 8)
         {

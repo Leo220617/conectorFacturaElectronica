@@ -27,6 +27,13 @@ namespace WAConectorAPI.Models.ModelCliente
         public virtual DbSet<Cantones> Cantones { get; set; }
         public virtual DbSet<Distritos> Distritos { get; set; }
         public virtual DbSet<Barrios> Barrios { get; set; }
+        //Parte grafica
+        public virtual DbSet<Login> Login { get; set; }
+        public virtual DbSet<Roles> Roles { get; set; }
+        public virtual DbSet<SeguridadModulos> SeguridadModulos { get; set; }
+        public virtual DbSet<SeguridadRolesModulos> SeguridadRolesModulos { get; set; }
+        public virtual DbSet<CorreosRecepcion> CorreosRecepcion { get; set; }
+        public virtual DbSet<BandejaEntrada> BandejaEntrada { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

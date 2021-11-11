@@ -28,6 +28,7 @@ namespace WAConectorAPI.Models.ModelCliente
         public string SerieFEE { get; set; }
         public string urlCyber { get; set; }
         public string urlCyberRespHacienda { get; set; }
+        public string urlCyberAceptacion { get; set; }
         public string CampoConsecutivo { get; set; }
         public string CampoClave { get; set; }
         public string CampoEstado { get; set; }

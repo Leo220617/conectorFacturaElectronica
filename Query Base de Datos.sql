@@ -224,6 +224,7 @@ CREATE TABLE [dbo].[Parametros](
 	[SerieFEE] [varchar](3) NULL,
 	[urlCyber] [varchar](500) NULL,
 	[urlCyberRespHacienda] [varchar](500) NULL,
+	[urlCyberAceptacion] [varchar](500) NULL,
 	[CampoConsecutivo] [varchar](500) NULL,
 	[CampoClave] [varchar](500) NULL,
 	[CampoEstado] [varchar](500) NULL,
@@ -244,6 +245,7 @@ CREATE TABLE [dbo].[RespuestasCyber](
 ) ON [PRIMARY]
 GO
 -----------------------------------REspuestasCyber----------------------------------
+
 CREATE TABLE [dbo].[Sucursales](
 	[codSuc] [varchar](3) NOT NULL,
 	[Nombre] [varchar](100) NULL,
@@ -266,6 +268,7 @@ CREATE TABLE [dbo].[Sucursales](
 	[consecND] [int] NULL,
 	[consecFEC] [int] NULL,
 	[consecFEE] [int] NULL,
+	[consecAFC] [int] NULL,
 	[codPais] [varchar](3) NULL,
 	[idConexion] [int] NOT NULL,
 	[CodActividadComercial] [varchar](6) NULL,
@@ -304,3 +307,113 @@ GO
 ALTER TABLE [dbo].[BitacoraErrores] ADD  CONSTRAINT [DF_BitacoraErrores_Fecha]  DEFAULT (getdate()) FOR [Fecha]
 GO
 -----------------------------------Bitacora Errores-------------------------
+
+CREATE TABLE [dbo].[Login](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[idRol] [int] NULL,
+	[Email] [varchar](200) NULL,
+	[Nombre] [varchar](100) NULL,
+	[Activo] [bit] NULL,
+	[Clave] [varchar](500) NULL,
+ CONSTRAINT [PK_Login] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+---------------------------------------Login--------------------------------
+CREATE TABLE [dbo].[Roles](
+	[idRol] [int] IDENTITY(1,1) NOT NULL,
+	[NombreRol] [varchar](50) NULL,
+ CONSTRAINT [PK_Roles] PRIMARY KEY CLUSTERED 
+(
+	[idRol] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+-------------------------------------Roles---------------------------------
+
+CREATE TABLE [dbo].[SeguridadModulos](
+	[CodModulo] [int] NOT NULL,
+	[Descripcion] [varchar](150) NOT NULL,
+ CONSTRAINT [PK_SeguridadModulos_1] PRIMARY KEY CLUSTERED 
+(
+	[CodModulo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+--------------------------------------SeguridadModulos----------------------
+CREATE TABLE [dbo].[SeguridadRolesModulos](
+	[CodRol] [int] NOT NULL,
+	[CodModulo] [int] NOT NULL,
+ CONSTRAINT [PK_SeguridadRolesModulos_1] PRIMARY KEY CLUSTERED 
+(
+	[CodRol] ASC,
+	[CodModulo] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+-------------------------------SeguridadRolesModulos-----------------------------
+
+CREATE TABLE [dbo].[CorreosRecepcion](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[RecepcionEmail] [varchar](500) NULL,
+	[RecepcionPassword] [varchar](500) NULL,
+	[RecepcionHostName] [varchar](50) NULL,
+	[RecepcionUseSSL] [bit] NULL,
+	[RecepcionPort] [int] NULL,
+	[RecepcionUltimaLecturaImap] [datetime] NULL,
+ CONSTRAINT [PK_CorreosRecepcion] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+-------------------------------------CorreosRecepcion--------------------------------
+
+CREATE TABLE [dbo].[BandejaEntrada](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[XmlFactura] [varbinary](max) NULL,
+	[XmlConfirmacion] [varbinary](max) NULL,
+	[Pdf] [varbinary](max) NULL,
+	[FechaIngreso] [datetime] NOT NULL,
+	[Procesado] [varchar](1) NULL,
+	[FechaProcesado] [datetime] NULL,
+	[Mensaje] [varchar](max) NULL,
+	[Asunto] [varchar](max) NULL,
+	[Remitente] [varchar](max) NULL,
+	[NumeroConsecutivo] [varchar](100) NULL,
+	[TipoDocumento] [varchar](20) NULL,
+	[FechaEmision] [varchar](20) NULL,
+	[NombreEmisor] [varchar](200) NULL,
+	[IdEmisor] [varchar](100) NULL,
+	[CodigoMoneda] [varchar](20) NULL,
+	[TotalComprobante] [money] NULL,
+	[tipo] [varchar](3) NULL,
+	[Impuesto] [money] NULL,
+	[DetalleMensaje] [varchar](500) NULL,
+	[CodigoActividad] [varchar](20) NULL,
+	[CondicionImpuesto] [varchar](3) NULL,
+	[impuestoAcreditar] [money] NULL,
+	[gastoAplicable] [money] NULL,
+	[situacionPresentacion] [varchar](2) NULL,
+	[tipoIdentificacionEmisor] [varchar](3) NULL,
+	[JSON] [varchar](max) NULL,
+	[RespuestaHacienda] [varchar](50) NULL,
+	[XMLRespuesta] [varchar](max) NULL,
+	[ClaveReceptor] [varchar](100) NULL,
+	[ConsecutivoReceptor] [varchar](50) NULL,
+ CONSTRAINT [PK_BandejaEntrada] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[BandejaEntrada] ADD  CONSTRAINT [DF_BandejaEntrada_FechaIngreso]  DEFAULT (getdate()) FOR [FechaIngreso]
+GO
+
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'05 aceptacion, 06 parcial, 07 rechazado' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'BandejaEntrada', @level2type=N'COLUMN',@level2name=N'tipo'
+GO
+
+--------------------------------------------BandejaEntrada----------------------------------

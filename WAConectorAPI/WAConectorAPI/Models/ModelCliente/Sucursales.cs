@@ -62,7 +62,7 @@ namespace WAConectorAPI.Models.ModelCliente
 
         public int consecFEC { get; set; }
         public int consecFEE { get; set; }
-
+        public int consecAFC { get; set; }
         [StringLength(3)]
         public string codPais { get; set; }
 

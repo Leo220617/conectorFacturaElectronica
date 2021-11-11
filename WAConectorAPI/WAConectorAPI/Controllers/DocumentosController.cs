@@ -720,6 +720,8 @@ namespace WAConectorAPI.Controllers
 
                         var Encabezado = db.EncDocumento.Where(a => a.consecutivoSAP == enc.RefNumeroDocumento && !string.IsNullOrEmpty(a.ClaveHacienda)).FirstOrDefault();
                         
+                        if(Encabezado != null)
+                        {
                             enc.RefTipoDocumento = Encabezado.TipoDocumento;
                             enc.RefFechaEmision = Encabezado.Fecha.Value;
 
@@ -753,15 +755,63 @@ namespace WAConectorAPI.Controllers
                                     }
                                 }
 
-                            enc.RefNumeroDocumento = Encabezado.ClaveHacienda;
+                                enc.RefNumeroDocumento = Encabezado.ClaveHacienda;
 
-                        }
+                            }
                             catch (Exception pp)
                             {
                                 enc.RefCodigo = "01";
                                 enc.RefRazon = $"Anula documento electrónico { Encabezado.ClaveHacienda}";
 
                             }
+                        }
+                        else
+                        {
+                            var DocEntry1 = enc.RefNumeroDocumento;
+                            SQL = parametros.NCEnc + enc.RefNumeroDocumento + " ";
+                            SqlConnection CnR = new SqlConnection(conexion);
+                            SqlCommand CmdR = new SqlCommand(SQL, CnR);
+                            SqlDataAdapter DaR = new SqlDataAdapter(CmdR);
+                            DataSet DsR = new DataSet();
+                            CnR.Open();
+                            DaR.Fill(DsR, "RefEnc");
+                            enc.RefTipoDocumento = "01";
+                            try
+                            {
+                                enc.RefFechaEmision = Convert.ToDateTime(DsR.Tables["RefEnc"].Rows[0]["DocDate"]);
+                            }
+                            catch (Exception)
+                            {
+
+
+                            }
+
+
+                            try
+                            {
+                                enc.RefNumeroDocumento = Convert.ToString(DsR.Tables["RefEnc"].Rows[0]["ClaveHacienda"]);
+                            }
+                            catch (Exception ex)
+                            {
+
+                                BitacoraErrores be = new BitacoraErrores();
+                                be.DocNum = DocNum;
+                                be.Type = ObjType;
+                                be.Descripcion = ex.Message;
+                                be.StackTrace = ex.StackTrace;
+                                be.Fecha = DateTime.Now;
+                                db.BitacoraErrores.Add(be);
+                                db.SaveChanges();
+                            }
+
+                            enc.RefCodigo = "01";
+                            enc.RefRazon = $"Anula documento electrónico { enc.RefNumeroDocumento}";
+
+
+
+                            CnR.Close();
+                        }
+                            
                          
                        
 
@@ -1333,6 +1383,32 @@ namespace WAConectorAPI.Controllers
                     }
 
                     db.SaveChanges();
+                }
+                else
+                {
+                    var ClaveRespuesta = datos.clave.Split('-');
+                    string Clave = ClaveRespuesta[0];
+                    var bandeja = db.BandejaEntrada.Where(a => a.ClaveReceptor == Clave).FirstOrDefault();
+
+                    if(bandeja != null)
+                    {
+                        db.Entry(bandeja).State = System.Data.Entity.EntityState.Modified;
+                        bandeja.XMLRespuesta = datos.respuesta_xml;
+                        bandeja.RespuestaHacienda = datos.ind_estado;
+                        bandeja.ConsecutivoReceptor = ClaveRespuesta[1];
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        BitacoraErrores be = new BitacoraErrores();
+                        be.DocNum = "";
+                        be.Type = "";
+                        be.Descripcion = "No se encontro " + JsonConvert.SerializeObject(datos) ;
+                        be.StackTrace = "Respuesta";
+                        be.Fecha = DateTime.Now;
+                        db.BitacoraErrores.Add(be);
+                        db.SaveChanges();
+                    }
                 }
 
            
