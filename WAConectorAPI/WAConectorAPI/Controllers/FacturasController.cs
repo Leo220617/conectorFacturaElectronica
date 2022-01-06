@@ -32,6 +32,7 @@ namespace WAConectorAPI.Controllers
                 {
                     if(filtro.Estado != "NULL")
                     {
+                        Documentos = Documentos.Where(a => a.RespuestaHacienda != null).ToList();
                         Documentos = Documentos.Where(a => a.RespuestaHacienda.ToUpper().Contains(filtro.Estado.ToUpper())).ToList();
 
                     }
