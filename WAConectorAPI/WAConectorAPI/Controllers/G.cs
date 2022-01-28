@@ -11,6 +11,31 @@ namespace WAConectorAPI.Controllers
 {
     public class G
     {
+        public string GuardarPDF(byte[] result, string idFac)
+        {
+            
+
+            try
+            {
+                byte[] bytes = result;
+
+                string path = HttpContext.Current.Server.MapPath("~") + $"\\Temp\\{idFac}.pdf";
+               
+
+
+                System.IO.File.WriteAllBytes(path, bytes);
+
+
+                return idFac + ".pdf";
+
+            }
+
+            catch (Exception e)
+            {
+                return "";
+            }
+
+        }
         public byte[] Zip(string str)
         {
             var bytes = Encoding.UTF8.GetBytes(str);

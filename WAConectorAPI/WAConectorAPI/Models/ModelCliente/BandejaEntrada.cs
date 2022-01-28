@@ -13,7 +13,7 @@ namespace WAConectorAPI.Models.ModelCliente
 
         public byte[] XmlFactura { get; set; }
 
-        public byte[] XmlConfirmacion { get; set; }
+        public string XmlConfirmacion { get; set; }
 
         public byte[] Pdf { get; set; }
 

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Web;
+using System.Web.Configuration;
 using WAConectorAPI.Models;
  
 using WAConectorAPI.Models.ModelCliente;
@@ -447,5 +448,18 @@ namespace WAConectorAPI.Controllers
             return codigo;
         }
 
+
+
+        public  string ObtenerConfig(string v)
+        {
+            try
+            {
+                return WebConfigurationManager.AppSettings[v];
+            }
+            catch
+            {
+                return "";
+            }
+        }
     }
 }

@@ -201,6 +201,20 @@ namespace WAConectorAPI.Controllers
                     }
 
 
+                    if(metodo.ObtenerConfig("ValidarCedula") == "1")
+                    {
+                        if(string.IsNullOrEmpty(enc.TipoIdentificacion)) //Preguntamos si viene vacio la identificacion para hacerlo tiquete
+                        {
+                            enc.TipoDocumento = "04";
+                            db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                            Sucursal.consecFac--;
+                            enc.consecutivoInterno = Sucursal.consecTiq;
+                            Sucursal.consecTiq++;
+                           db.SaveChanges();
+                        }
+                    }
+
+
 
                     enc.condicionVenta = Ds.Tables["Encabezado"].Rows[0]["CondicionVenta"].ToString(); //Se toma la condicion de venta de sap y se busca en la base de datos intermedia
                     enc.condicionVenta = db.CondicionesVenta.Where(a => a.codSAP == enc.condicionVenta).FirstOrDefault().codCyber;

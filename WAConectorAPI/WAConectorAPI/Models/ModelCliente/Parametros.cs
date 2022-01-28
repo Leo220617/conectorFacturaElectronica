@@ -32,5 +32,6 @@ namespace WAConectorAPI.Models.ModelCliente
         public string CampoConsecutivo { get; set; }
         public string CampoClave { get; set; }
         public string CampoEstado { get; set; }
+        public string urlWebApi { get; set; }
     }
 }

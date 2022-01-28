@@ -153,11 +153,12 @@ namespace WAConectorAPI.Controllers
 
                                                     new SqlParameter("@Id", idGeneral));
                                                     }
-
+                                                    bandeja = db.BandejaEntrada.Where(a => a.Id == idGeneral).FirstOrDefault();
                                                     db.Entry(bandeja).State = EntityState.Modified;
                                                     bandeja.impuestoAcreditar = 0;
                                                     bandeja.gastoAplicable = 0;
                                                     bandeja.CodigoActividad = db.Sucursales.FirstOrDefault().CodActividadComercial;
+                                                    bandeja.XmlConfirmacion = G.GuardarPDF(ByteArrayPDF, bandeja.NumeroConsecutivo + "_" + bandeja.NombreEmisor);
                                                     db.SaveChanges();
 
                                                 }
