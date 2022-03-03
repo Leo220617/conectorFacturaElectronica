@@ -120,7 +120,7 @@ namespace WAConectorAPI.Controllers
                     throw new Exception("Este documento no es electronico");
                 }
 
-                var Factura = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento && a.code == 1 && a.RespuestaHacienda.Contains("aprobado")).FirstOrDefault();
+                var Factura = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento && a.code == 1 && a.RespuestaHacienda.Contains("aceptado")).FirstOrDefault();
                 if (Factura == null)
                 {
                     var DocEntry = Ds.Tables["Encabezado"].Rows[0]["DocEntry"].ToString();

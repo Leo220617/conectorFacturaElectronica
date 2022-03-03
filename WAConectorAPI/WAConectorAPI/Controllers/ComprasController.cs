@@ -88,8 +88,10 @@ namespace WAConectorAPI.Controllers
 
 
                                             if (texto.Contains("FacturaElectronica")
+                                                    || texto.Contains("NotaCreditoElectronica")
                                                     && !texto.Contains("TiqueteElectronico")
-                                                    && !texto.Contains("NotaCreditoElectronica")
+
+                                                    //  && !texto.Contains("NotaCreditoElectronica")
                                                     && !texto.Contains("NotaDebitoElectronica"))
                                             {
                                                 var emailByteArray = G.Zip(texto);

@@ -108,7 +108,7 @@ t1.U_FactorDeVenta IS NULL then 0 ELSE t1.U_FactorDeVenta END as FactorIVA
  ----------------------------------------------------INSERTAR IMPUESTOS DE EXONERACIONES------------------------------------------
 
  select * from NNM1 --Series
- 
+ select * from OSTC --Impuestos
  
  
  
