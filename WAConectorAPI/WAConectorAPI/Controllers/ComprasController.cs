@@ -108,7 +108,7 @@ namespace WAConectorAPI.Controllers
 
                                                     var datos = G.ObtenerDatosXmlRechazado(texto);
                                                     var Detalle = db.BandejaEntrada.Where(a => a.NumeroConsecutivo == datos.NumeroConsecutivo && a.IdEmisor == datos.Numero).FirstOrDefault();
-                                                    if(datos.IdReceptor == db.Sucursales.FirstOrDefault().Cedula && Detalle == null)
+                                                    if(datos.IdReceptor == db.Sucursales.FirstOrDefault().Cedula && Detalle == null && !string.IsNullOrEmpty(datos.NumeroConsecutivo))
                                                     {
                                                         db.Database.ExecuteSqlCommand("Update BandejaEntrada set NumeroConsecutivo=@NumeroConsecutivo, " +
                                                        " TipoDocumento = @TipoDocumento, FechaEmision = @FechaEmision , " +
@@ -170,14 +170,28 @@ namespace WAConectorAPI.Controllers
                                         }
                                         catch (Exception ex)
                                         {
-
+                                            BitacoraErrores be = new BitacoraErrores();
+                                            be.DocNum = "";
+                                            be.Type = "";
+                                            be.Descripcion = ex.Message;
+                                            be.StackTrace = ex.StackTrace;
+                                            be.Fecha = DateTime.Now;
+                                            db.BitacoraErrores.Add(be);
+                                            db.SaveChanges();
 
                                         }
                                     }
                                 }
                                 catch (Exception ex)
                                 {
-
+                                    BitacoraErrores be = new BitacoraErrores();
+                                    be.DocNum = "";
+                                    be.Type = "";
+                                    be.Descripcion = ex.Message;
+                                    be.StackTrace = ex.StackTrace;
+                                    be.Fecha = DateTime.Now;
+                                    db.BitacoraErrores.Add(be);
+                                    db.SaveChanges();
 
                                 }
                             }
@@ -220,9 +234,15 @@ namespace WAConectorAPI.Controllers
             try
             {
                 DateTime time = new DateTime();
+
+
                 var Compras = db.BandejaEntrada.Where(a => (filtro.FechaInicial != time ? a.FechaIngreso >= filtro.FechaInicial : true)).ToList();
 
-                
+                if(filtro.FechaFinal != time)
+                {
+                    filtro.FechaFinal = filtro.FechaFinal.AddDays(1);
+                    Compras = Compras.Where(a => a.FechaIngreso <= filtro.FechaFinal).ToList();
+                }
 
 
                 return Request.CreateResponse(HttpStatusCode.OK, Compras);

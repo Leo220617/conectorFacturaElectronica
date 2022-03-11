@@ -120,14 +120,14 @@ namespace WAConectorAPI.Controllers
                     throw new Exception("Este documento no es electronico");
                 }
 
-                var Factura = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento && a.code == 1 && a.RespuestaHacienda.Contains("aceptado")).FirstOrDefault();
+                var Factura = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento && a.code == 1 && (a.RespuestaHacienda.Contains("aceptado") || a.RespuestaHacienda == null)).FirstOrDefault();
                 if (Factura == null)
                 {
                     var DocEntry = Ds.Tables["Encabezado"].Rows[0]["DocEntry"].ToString();
                     //Se toma el docentry del encabezado en la consulta
                     enc.DocEntry = DocEntry;
                     //Preguntaremos si ya existe un documento creado con status != 1 y que el consecutivo de hacienda sea diferente de null
-                    var Busqueda = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento && a.code != 1 ).FirstOrDefault();
+                    var Busqueda = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento && a.code != 1 && a.code != 44).FirstOrDefault(); //probando si es  44 debe crear un consecutivo nuevo, porque esta malo el que tiene
                     if (Busqueda == null)
                     {
                         enc.consecutivoInterno = consecInterno; //Se toma el consecutivo  dependiendo el documento electronico a generar
@@ -327,7 +327,7 @@ namespace WAConectorAPI.Controllers
                         det.unidadMedidaComercial = item["UnidadMedida"].ToString();
                         det.unidadMedidaComercial = db.UnidadesMedida.Where(a => a.codSAP == det.unidadMedidaComercial).FirstOrDefault().Nombre;
                         det.NomPro = item["NomPro"].ToString();
-                        det.PrecioUnitario = Convert.ToDecimal(item["PrecioUnitario"]);
+                        det.PrecioUnitario = Math.Round(Convert.ToDecimal(item["PrecioUnitario"]),2);
                         det.MontoTotal = Math.Round(det.cantidad * det.PrecioUnitario, 2);
                         var desc = Convert.ToDecimal(item["PorDesc"]) / 100;
                         det.MontoDescuento = det.MontoTotal * desc < 0 ? 0 : Math.Round(det.MontoTotal * desc, 2);
@@ -948,6 +948,38 @@ namespace WAConectorAPI.Controllers
                 }
                 else
                 {
+
+                    switch (tipoDocumento)
+                    {
+                        case "01":
+                            {
+                                db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                Sucursal.consecFac--;
+                                db.SaveChanges();
+                                break;
+                            }
+                        case "02":
+                            {
+                                db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                Sucursal.consecND--;
+                                db.SaveChanges();
+                                break;
+                            }
+                        case "03":
+                            {
+                                db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                Sucursal.consecNC--;
+                                db.SaveChanges();
+                                break;
+                            }
+                        case "04":
+                            {
+                                db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                Sucursal.consecTiq--;
+                                db.SaveChanges();
+                                break;
+                            }
+                    }
                     //Se vuelve a enviar en el caso de que haya existido un error
                     t.Commit();
                     if( Factura.code != 1)
@@ -1446,5 +1478,13 @@ namespace WAConectorAPI.Controllers
             }
         }
 
+
+       
+
     }
+
+
+
+
+    
 }

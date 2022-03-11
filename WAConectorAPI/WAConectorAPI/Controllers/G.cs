@@ -6,11 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using WAConectorAPI.Models.ModelCliente;
 
 namespace WAConectorAPI.Controllers
 {
     public class G
     {
+        ModelCliente db = new ModelCliente();
+
         public string GuardarPDF(byte[] result, string idFac)
         {
             
@@ -30,8 +33,16 @@ namespace WAConectorAPI.Controllers
 
             }
 
-            catch (Exception e)
+            catch (Exception ex)
             {
+                BitacoraErrores be = new BitacoraErrores();
+                be.DocNum = "";
+                be.Type = "";
+                be.Descripcion = ex.Message;
+                be.StackTrace = ex.StackTrace;
+                be.Fecha = DateTime.Now;
+                db.BitacoraErrores.Add(be);
+                db.SaveChanges();
                 return "";
             }
 

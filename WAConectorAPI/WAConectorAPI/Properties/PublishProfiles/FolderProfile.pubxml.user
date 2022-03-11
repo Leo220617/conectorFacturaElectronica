@@ -688,10 +688,10 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>09/17/2021 22:32:11</publishTime>
     </File>
     <File Include="bin/WAConectorAPI.dll">
-      <publishTime>03/01/2022 13:00:34</publishTime>
+      <publishTime>03/10/2022 10:47:00</publishTime>
     </File>
     <File Include="bin/WAConectorAPI.pdb">
-      <publishTime>03/01/2022 13:00:34</publishTime>
+      <publishTime>03/10/2022 10:47:00</publishTime>
     </File>
     <File Include="bin/WebGrease.dll">
       <publishTime>09/17/2021 23:37:12</publishTime>
@@ -787,7 +787,7 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>09/17/2021 23:37:10</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>03/01/2022 13:00:35</publishTime>
+      <publishTime>03/10/2022 10:35:30</publishTime>
     </File>
   </ItemGroup>
 </Project>

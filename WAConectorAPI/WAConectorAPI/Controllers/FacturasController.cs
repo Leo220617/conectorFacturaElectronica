@@ -1,12 +1,16 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using WAConectorAPI.Models;
+using WAConectorAPI.Models.Apis;
 using WAConectorAPI.Models.ModelCliente;
 
 namespace WAConectorAPI.Controllers
@@ -21,6 +25,10 @@ namespace WAConectorAPI.Controllers
             try
             {
                 DateTime time = new DateTime();
+                if(filtro.FechaFinal != time)
+                {
+                    filtro.FechaFinal = filtro.FechaFinal.AddDays(1);
+                }
                 var Documentos = db.EncDocumento.Where( a =>(filtro.FechaInicial != time ? a.Fecha >= filtro.FechaInicial : true) && (filtro.FechaFinal != time ? a.Fecha <= filtro.FechaFinal : true)).ToList();
 
                 if (!string.IsNullOrEmpty(filtro.Texto))
@@ -104,6 +112,79 @@ namespace WAConectorAPI.Controllers
             {
 
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
+
+        /////Reenvio de facturas
+        ///
+        [Route("api/Facturas/Reenvio")]
+        [HttpGet]
+        public async System.Threading.Tasks.Task<HttpResponseMessage> GetReenvioAsync([FromUri] int id, string Sucursal = "001")
+        {
+
+            try
+            {
+
+                var item = db.EncDocumento.Where(a => a.id == id).FirstOrDefault();
+
+                var parametros = db.Parametros.FirstOrDefault();
+                var sucursal = db.Sucursales.Where(a => a.codSuc == Sucursal).FirstOrDefault();
+                if (item != null)
+                {
+                    var cuerpo = new MakeXMLReenvioFacturas();
+                    cuerpo.api_key = sucursal.ApiKey;
+                    cuerpo.clave = item.ClaveHacienda;
+                    cuerpo.correos = item.Email;
+
+
+
+                    HttpClient cliente2 = new HttpClient();
+
+
+
+                    var httpContent2 = new StringContent(JsonConvert.SerializeObject(cuerpo), Encoding.UTF8, "application/json");
+                    cliente2.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    try
+                    {
+                        HttpResponseMessage response2 = await cliente2.PostAsync(parametros.urlCyberReenvio, httpContent2);
+                        if (response2.IsSuccessStatusCode)
+                        {
+                            response2.Content.Headers.ContentType.MediaType = "application/json";
+                            var resp2 = await response2.Content.ReadAsStringAsync();
+
+                            return Request.CreateResponse(HttpStatusCode.OK, item);
+                        }
+                        else
+                        {
+                            return Request.CreateResponse(HttpStatusCode.OK, item);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+
+                    }
+                }
+
+
+
+
+
+                return Request.CreateResponse(HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+
+                BitacoraErrores be = new BitacoraErrores();
+                be.DocNum = "";
+                be.Type = "";
+                be.Descripcion = ex.Message;
+                be.StackTrace = ex.StackTrace;
+                be.Fecha = DateTime.Now;
+                db.BitacoraErrores.Add(be);
+                db.SaveChanges();
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+
             }
         }
     }

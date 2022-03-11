@@ -307,6 +307,7 @@
     <Compile Include="Models\Apis\cuerpoRespuesta.cs" />
     <Compile Include="Models\Apis\MakeXML.cs" />
     <Compile Include="Models\Apis\MakeXMLAceptacionFactura.cs" />
+    <Compile Include="Models\Apis\MakeXMLReenvioFacturas.cs" />
     <Compile Include="Models\Apis\respuesta.cs" />
     <Compile Include="Models\Apis\respuestaHacienda.cs" />
     <Compile Include="Models\Filtros.cs" />
