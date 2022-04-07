@@ -1173,11 +1173,130 @@ namespace WAConectorAPI.Controllers
             {
                 var Documentos = db.EncDocumento.Where(a => a.RespuestaHacienda.ToLower().Contains("procesando") ).ToList();
                 var Documentos1 = db.EncDocumento.Where(a =>   a.sincronizadaSAP == false).ToList();
-                
+                var Documentos2 = db.EncDocumento.Where(a => a.procesadaHacienda == false && a.code == 0).ToList();
+
+
                 var parametros = db.Parametros.FirstOrDefault();
                 Metodos metodo = new Metodos();
 
+                foreach(var item in Documentos2)
+                {
+                    try
+                    {
+                        if (item.code != 1)
+                        {
+                            var Sucursal = db.Sucursales.Where(a => a.codSuc == item.idSucursal).FirstOrDefault();
+                            var DetFactura = db.DetDocumento.Where(a => a.idEncabezado == item.id).ToList();
 
+                            MakeXML xml = metodo.RellenarXML(item, DetFactura.ToArray());
+                            HttpClient cliente = new HttpClient();
+
+                            var httpContent = new StringContent(JsonConvert.SerializeObject(xml), Encoding.UTF8, "application/json");
+                            cliente.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            try
+                            {
+                                HttpResponseMessage response = await cliente.PutAsync(parametros.urlCyber, httpContent);
+
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    response.Content.Headers.ContentType.MediaType = "application/json";
+                                    var resp = await response.Content.ReadAsAsync<respuesta>();
+                                    db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                                    item.procesadaHacienda = true;
+                                    item.code = resp.code;
+                                    item.RespuestaHacienda = resp.hacienda_mensaje;
+                                    item.XMLFirmado = resp.data;
+                                    item.JSON = JsonConvert.SerializeObject(xml);
+                                    item.ClaveHacienda = resp.clave;
+                                    if (resp.clave != null)
+                                    {
+                                        if (resp.clave.Length > 3)
+                                        {
+                                            item.ConsecutivoHacienda = item.ClaveHacienda.Substring(21, 20);
+
+
+
+                                        }
+
+
+                                    }
+                                    item.ErrorCyber = resp.xml_error;
+
+                                    if (item.code == 1)
+                                    {
+                                        //REspuesta de hacienda
+                                        cuerpoRespuesta cuerpo = new cuerpoRespuesta();
+                                        cuerpo.api_key = Sucursal.ApiKey;
+                                        cuerpo.clave = item.ClaveHacienda;
+                                        HttpClient cliente2 = new HttpClient();
+
+                                        var httpContent2 = new StringContent(JsonConvert.SerializeObject(cuerpo), Encoding.UTF8, "application/json");
+                                        cliente2.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                                        try
+                                        {
+                                            HttpResponseMessage response2 = await cliente2.PostAsync(parametros.urlCyberRespHacienda, httpContent2);
+                                            if (response2.IsSuccessStatusCode)
+                                            {
+                                                response2.Content.Headers.ContentType.MediaType = "application/json";
+                                                var resp2 = await response2.Content.ReadAsAsync<respuestaHacienda>();
+
+                                                if (resp2.data.ind_estado.Contains("aceptado"))
+                                                {
+                                                    item.RespuestaHacienda = resp2.data.ind_estado;
+                                                    item.XMLFirmado = resp2.data.respuesta_xml;
+
+
+                                                }
+                                                else
+                                                {
+                                                    item.RespuestaHacienda = resp2.data.ind_estado;
+
+                                                }
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+
+
+                                        }
+
+                                        //
+                                    }
+
+                                    db.SaveChanges();
+                                    //product = await response.Content.ReadAsAsync<ListaOrdenes>();
+
+                                }
+
+                            }
+                            catch (Exception ex)
+                            {
+                                BitacoraErrores be = new BitacoraErrores();
+                                be.DocNum = item.DocEntry;
+                                be.Type = item.TipoDocumento;
+                                be.Descripcion = ex.Message;
+                                be.StackTrace = ex.StackTrace;
+                                be.Fecha = DateTime.Now;
+                                db.BitacoraErrores.Add(be);
+                                db.SaveChanges();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+
+                        BitacoraErrores be = new BitacoraErrores();
+                        be.DocNum = item.consecutivoSAP;
+                        be.Type = item.TipoDocumento;
+                        be.Descripcion = ex.Message;
+                        be.StackTrace = ex.StackTrace;
+                        be.Fecha = DateTime.Now;
+                        db.BitacoraErrores.Add(be);
+                        db.SaveChanges();
+                    }
+                }
+
+                //Poner el consecutivo en SAP
                 foreach(var item in Documentos1)
                 {
                     if(!string.IsNullOrEmpty(item.ClaveHacienda))
@@ -1240,7 +1359,7 @@ namespace WAConectorAPI.Controllers
                     
                 }
 
-
+                //Verificar Estado de hacienda
                 foreach(var item in Documentos)
                 {
 
@@ -1268,7 +1387,7 @@ namespace WAConectorAPI.Controllers
                             {
                                 item.RespuestaHacienda = resp2.data.ind_estado;
                                 item.XMLFirmado = resp2.data.respuesta_xml;
-
+                                item.code = resp2.code;
                                 var Cn5 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
                                 var Cmd5 = new SqlCommand();
 

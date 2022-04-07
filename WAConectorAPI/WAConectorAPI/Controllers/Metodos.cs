@@ -218,7 +218,9 @@ namespace WAConectorAPI.Controllers
                     xml.emisor.ubicacion = new ubicacion();
                     xml.emisor.ubicacion.provincia = Provincia.ToString();
                     xml.emisor.ubicacion.canton = db.Cantones.Where(a => a.NomCanton.ToLower().Contains(Canton.ToLower())).FirstOrDefault().CodCanton.ToString();
-                    xml.emisor.ubicacion.distrito = db.Distritos.Where(a => a.NomDistrito.ToLower().Contains(Distrito.ToLower())).FirstOrDefault().CodDistrito.ToString();
+                    var canton = db.Cantones.Where(a => a.NomCanton.ToLower().Contains(Canton.ToLower())).FirstOrDefault().CodCanton;
+                    xml.emisor.ubicacion.distrito = db.Distritos.Where(a => a.NomDistrito.ToLower().Contains(Distrito.ToLower()) && a.CodCanton == canton && a.CodProvincia == Provincia).FirstOrDefault().CodDistrito.ToString();
+                    var distrito = db.Distritos.Where(a => a.NomDistrito.ToLower().Contains(Distrito.ToLower()) && a.CodCanton == canton && a.CodProvincia == Provincia).FirstOrDefault().CodDistrito;
                     xml.emisor.ubicacion.barrio = db.Barrios.Where(a => a.NomBarrio.ToLower().Contains(Distrito.ToLower())).FirstOrDefault() != null ? db.Barrios.Where(a => a.NomBarrio.ToLower().Contains(Distrito.ToLower())).FirstOrDefault().CodBarrio.ToString() : "1" ; 
                     xml.emisor.ubicacion.sennas = Ds.Tables["Proveedor"].Rows[0]["Street"].ToString();
 

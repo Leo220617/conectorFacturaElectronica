@@ -33,7 +33,7 @@ namespace WAConectorAPI.Controllers
 
                 if (!string.IsNullOrEmpty(filtro.Texto))
                 {
-                    Documentos = Documentos.Where(a => a.consecutivoSAP.ToUpper().Contains(filtro.Texto.ToUpper())).ToList();
+                    Documentos = Documentos.Where(a => a.moneda.ToUpper().Contains(filtro.Texto.ToUpper())).ToList();
                 }
 
                 if(!string.IsNullOrEmpty(filtro.Estado))
@@ -53,6 +53,8 @@ namespace WAConectorAPI.Controllers
 
                     }
                 }
+
+              
 
                 return Request.CreateResponse(HttpStatusCode.OK, Documentos);
 
@@ -119,7 +121,7 @@ namespace WAConectorAPI.Controllers
         ///
         [Route("api/Facturas/Reenvio")]
         [HttpGet]
-        public async System.Threading.Tasks.Task<HttpResponseMessage> GetReenvioAsync([FromUri] int id, string Sucursal = "001")
+        public async System.Threading.Tasks.Task<HttpResponseMessage> GetReenvioAsync([FromUri] int id, string Sucursal = "001", string Correo= "")
         {
 
             try
@@ -134,7 +136,15 @@ namespace WAConectorAPI.Controllers
                     var cuerpo = new MakeXMLReenvioFacturas();
                     cuerpo.api_key = sucursal.ApiKey;
                     cuerpo.clave = item.ClaveHacienda;
-                    cuerpo.correos = item.Email;
+                    if(string.IsNullOrEmpty(Correo))
+                    {
+                     cuerpo.correos = item.Email;
+
+                    }
+                    else
+                    {
+                        cuerpo.correos = Correo;
+                    }
 
 
 
