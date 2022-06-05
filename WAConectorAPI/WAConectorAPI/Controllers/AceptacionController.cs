@@ -103,12 +103,12 @@ namespace WAConectorAPI.Controllers
                 xml.clave.detalle_mensaje = bandeja.DetalleMensaje;
                 xml.clave.codigo_actividad = bandeja.CodigoActividad;
                 xml.clave.condicion_impuesto = bandeja.CondicionImpuesto;
-                xml.clave.impuesto_acreditar = Math.Round(bandeja.impuestoAcreditar).ToString();  
-                xml.clave.gasto_aplicable = Math.Round(bandeja.gastoAplicable).ToString();
-                xml.clave.monto_total_impuesto = Math.Round(Bandeja.Impuesto).ToString();
-                xml.clave.total_factura = Math.Round(Bandeja.TotalComprobante.Value).ToString();
+                xml.clave.impuesto_acreditar = Math.Round(bandeja.impuestoAcreditar).ToString().Replace(",", ".");  
+                xml.clave.gasto_aplicable = Math.Round(bandeja.gastoAplicable).ToString().Replace(",", ".");
+                xml.clave.monto_total_impuesto = Math.Round(Bandeja.Impuesto).ToString().Replace(",", ".");
+                xml.clave.total_factura = Math.Round(Bandeja.TotalComprobante.Value).ToString().Replace(",", ".");
                 xml.clave.numero_cedula_receptor = Sucursal.Cedula;
-                xml.clave.num_consecutivo_receptor = Sucursal.consecAFC.ToString();
+                xml.clave.num_consecutivo_receptor = Sucursal.consecAFC.ToString().Replace(",", ".");
 
                 db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
                 Sucursal.consecAFC += 1;

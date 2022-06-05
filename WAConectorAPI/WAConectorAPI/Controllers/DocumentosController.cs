@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Odbc;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
@@ -54,7 +55,7 @@ namespace WAConectorAPI.Controllers
                 }
 
                 var conexion = metodo.DevuelveCadena(CodSucursal);
-
+               
                 SqlConnection Cn = new SqlConnection(conexion);
                 SqlCommand Cmd = new SqlCommand(SQL, Cn);
                 SqlDataAdapter Da = new SqlDataAdapter(Cmd);
@@ -69,50 +70,95 @@ namespace WAConectorAPI.Controllers
                 var Serie = Convert.ToInt32(Ds.Tables["Encabezado"].Rows[0]["Series"]);
                 var Sucursal = db.Sucursales.Where(a => a.codSuc == CodSucursal).FirstOrDefault();
                 var tipoDocumento = "";
-
-                if (ObjType == "13")
+                if (metodo.ObtenerConfig("ValidarNumerico") == "1") //Si NO le importa el consecutivo
                 {
-                    if(Serie == Convert.ToInt32(parametros.SerieFE))
+                    if (ObjType == "13")
                     {
-                        tipoDocumento = "01";
-                        consecInterno = Sucursal.consecFac.Value;
-                        db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                        Sucursal.consecFac++;
-                        db.SaveChanges();
+                        if (Serie == Convert.ToInt32(parametros.SerieFE))
+                        {
+                            tipoDocumento = "01";
+                            consecInterno = Sucursal.consecFac.Value;
+                            db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                            Sucursal.consecFac++;
+                            db.SaveChanges();
+                        }
+                        else if (Serie == Convert.ToInt32(parametros.SerieTE))
+                        {
+                            tipoDocumento = "04";
+                            consecInterno = Sucursal.consecTiq.Value;
+                            db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                            Sucursal.consecTiq++;
+                            db.SaveChanges();
+                        }
+                        else if (Serie == Convert.ToInt32(parametros.SerieND))
+                        {
+                            tipoDocumento = "02";
+                            consecInterno = Sucursal.consecND.Value;
+                            db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                            Sucursal.consecND++;
+                            db.SaveChanges();
+                        }
+                        else if (Serie == Convert.ToInt32(parametros.SerieFEE))
+                        {
+                            tipoDocumento = "09";
+                            consecInterno = Sucursal.consecFEE;
+                            db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                            Sucursal.consecFEE++;
+                            db.SaveChanges();
+                        }
                     }
-                    else if (Serie == Convert.ToInt32(parametros.SerieTE))
+                    else if (ObjType == "14")
                     {
-                        tipoDocumento = "04";
-                        consecInterno = Sucursal.consecTiq.Value;
-                        db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                        Sucursal.consecTiq++;
-                        db.SaveChanges();
-                    }else if(Serie == Convert.ToInt32(parametros.SerieND))
-                    {
-                        tipoDocumento = "02";
-                        consecInterno = Sucursal.consecND.Value;
-                        db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                        Sucursal.consecND++;
-                        db.SaveChanges();
-                    }else if(Serie == Convert.ToInt32(parametros.SerieFEE))
-                    {
-                        tipoDocumento = "09";
-                        consecInterno = Sucursal.consecFEE;
-                        db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                        Sucursal.consecFEE++;
-                        db.SaveChanges();
-                    }
-                }else if(ObjType == "14")
-                {
-                    if (Serie == Convert.ToInt32(parametros.SerieNC))
-                    {
-                        tipoDocumento = "03";
-                        consecInterno = Sucursal.consecNC.Value;
-                        db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                        Sucursal.consecNC++;
-                        db.SaveChanges();
+                        if (Serie == Convert.ToInt32(parametros.SerieNC))
+                        {
+                            tipoDocumento = "03";
+                            consecInterno = Sucursal.consecNC.Value;
+                            db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                            Sucursal.consecNC++;
+                            db.SaveChanges();
+                        }
                     }
                 }
+                else
+                {
+                    if (ObjType == "13")
+                    {
+                        if (Serie == Convert.ToInt32(parametros.SerieFE))
+                        {
+                            tipoDocumento = "01";
+                            consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecFac.Value;
+                            
+                        }
+                        else if (Serie == Convert.ToInt32(parametros.SerieTE))
+                        {
+                            tipoDocumento = "04";
+                            consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecTiq.Value;
+                           
+                        }
+                        else if (Serie == Convert.ToInt32(parametros.SerieND))
+                        {
+                            tipoDocumento = "02";
+                            consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecND.Value;
+                            
+                        }
+                        else if (Serie == Convert.ToInt32(parametros.SerieFEE))
+                        {
+                            tipoDocumento = "09";
+                            consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecFEE;
+                            
+                        }
+                    }
+                    else if (ObjType == "14")
+                    {
+                        if (Serie == Convert.ToInt32(parametros.SerieNC))
+                        {
+                            tipoDocumento = "03";
+                            consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecNC.Value;
+                             
+                        }
+                    }
+                }
+                    
 
 
                 if(string.IsNullOrEmpty(tipoDocumento))
@@ -126,50 +172,60 @@ namespace WAConectorAPI.Controllers
                     var DocEntry = Ds.Tables["Encabezado"].Rows[0]["DocEntry"].ToString();
                     //Se toma el docentry del encabezado en la consulta
                     enc.DocEntry = DocEntry;
-                    //Preguntaremos si ya existe un documento creado con status != 1 y que el consecutivo de hacienda sea diferente de null
-                    var Busqueda = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento && a.code != 1 && a.code != 44).FirstOrDefault(); //probando si es  44 debe crear un consecutivo nuevo, porque esta malo el que tiene
-                    if (Busqueda == null)
+
+                    if (metodo.ObtenerConfig("ValidarNumerico") == "1") //Si NO le importa el consecutivo
+                    {
+                        //Preguntaremos si ya existe un documento creado con status != 1 y que el consecutivo de hacienda sea diferente de null
+                        var Busqueda = db.EncDocumento.Where(a => a.consecutivoSAP == DocNum && a.TipoDocumento == tipoDocumento && a.code != 1 && a.code != 44).FirstOrDefault(); //probando si es  44 debe crear un consecutivo nuevo, porque esta malo el que tiene
+                        if (Busqueda == null)
+                        {
+                            enc.consecutivoInterno = consecInterno; //Se toma el consecutivo  dependiendo el documento electronico a generar
+                        }
+                        else // No se genera un consecutivo nuevo por lo tanto no deberia de generar una sumatoria a la tabla de sucursales
+                        {
+                            switch (tipoDocumento)
+                            {
+                                case "01":
+                                    {
+                                        db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                        Sucursal.consecFac--;
+                                        db.SaveChanges();
+                                        break;
+                                    }
+                                case "02":
+                                    {
+                                        db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                        Sucursal.consecND--;
+                                        db.SaveChanges();
+                                        break;
+                                    }
+                                case "03":
+                                    {
+                                        db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                        Sucursal.consecNC--;
+                                        db.SaveChanges();
+                                        break;
+                                    }
+                                case "04":
+                                    {
+                                        db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                        Sucursal.consecTiq--;
+                                        db.SaveChanges();
+                                        break;
+                                    }
+                            }
+                            enc.consecutivoInterno = Busqueda.consecutivoInterno; //Se toma el consecutivo  dependiendo el documento electronico a generar
+                        }
+                    }
+                    else
                     {
                         enc.consecutivoInterno = consecInterno; //Se toma el consecutivo  dependiendo el documento electronico a generar
-                    }
-                    else // No se genera un consecutivo nuevo por lo tanto no deberia de generar una sumatoria a la tabla de sucursales
-                    {
-                        switch(tipoDocumento)
-                        {
-                            case "01":
-                                {
-                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                                    Sucursal.consecFac--;
-                                    db.SaveChanges();
-                                    break;
-                                }
-                            case "02":
-                                {
-                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                                    Sucursal.consecND--;
-                                    db.SaveChanges();
-                                    break;
-                                }
-                            case "03":
-                                {
-                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                                    Sucursal.consecNC--;
-                                    db.SaveChanges();
-                                    break;
-                                }
-                            case "04":
-                                {
-                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                                    Sucursal.consecTiq--;
-                                    db.SaveChanges();
-                                    break;
-                                }
-                        }
-                        enc.consecutivoInterno = Busqueda.consecutivoInterno; //Se toma el consecutivo  dependiendo el documento electronico a generar
+
                     }
 
 
-                    
+
+
                     enc.TipoDocumento = tipoDocumento; //Tipo de documento a generar dependiendo la serie
                     enc.Fecha = Convert.ToDateTime(Ds.Tables["Encabezado"].Rows[0]["DocDate"]); // Se toma la fecha del comprobante y se le pone la hora actual
                     enc.Fecha = enc.Fecha.Value.AddHours(DateTime.Now.Hour);
@@ -617,8 +673,8 @@ namespace WAConectorAPI.Controllers
                     enc.totalexonerado = Math.Round( (enc.totalservicioexonerado + enc.totalmercaderiaexonerado).Value ,2);
 
                     enc.totalventa = Math.Round( (enc.totalgravado + enc.totalexento + enc.totalexonerado).Value ,2);
-                    enc.totaldescuentos = Math.Round( Detalles.Sum(a => a.MontoDescuento),2 );
-                    enc.totalventaneta = Math.Round( (enc.totalventa - enc.totaldescuentos).Value ,2 );
+                    enc.totaldescuentos = Math.Round( Detalles.Sum(a => a.MontoDescuento),2);
+                    enc.totalventaneta = Math.Round( (enc.totalventa - enc.totaldescuentos).Value ,2);
                     enc.totalimpuestos = Math.Round( Detalles.Sum(a => a.impNeto),2);
                     enc.totalivadevuelto = 0; //Servicios de salud no aplicables
                     enc.totalotroscargos = Math.Round(db.OtrosCargos.Where(a => a.idEncabezado == enc.id).FirstOrDefault() == null ? 0 : db.OtrosCargos.Where(a => a.idEncabezado == enc.id).Sum(d => d.monto), 2);
@@ -854,7 +910,7 @@ namespace WAConectorAPI.Controllers
                     cliente.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     try
                     {
-                        HttpResponseMessage response = await cliente.PutAsync(parametros.urlCyber, httpContent);
+                        HttpResponseMessage response = await cliente.PostAsync(parametros.urlCyber, httpContent);
 
                         if (response.IsSuccessStatusCode)
                         {
@@ -948,38 +1004,41 @@ namespace WAConectorAPI.Controllers
                 }
                 else
                 {
-
-                    switch (tipoDocumento)
+                    if (metodo.ObtenerConfig("ValidarNumerico") == "1") //Si NO le importa el consecutivo
                     {
-                        case "01":
-                            {
-                                db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                                Sucursal.consecFac--;
-                                db.SaveChanges();
-                                break;
-                            }
-                        case "02":
-                            {
-                                db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                                Sucursal.consecND--;
-                                db.SaveChanges();
-                                break;
-                            }
-                        case "03":
-                            {
-                                db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                                Sucursal.consecNC--;
-                                db.SaveChanges();
-                                break;
-                            }
-                        case "04":
-                            {
-                                db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                                Sucursal.consecTiq--;
-                                db.SaveChanges();
-                                break;
-                            }
+                        switch (tipoDocumento)
+                        {
+                            case "01":
+                                {
+                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                    Sucursal.consecFac--;
+                                    db.SaveChanges();
+                                    break;
+                                }
+                            case "02":
+                                {
+                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                    Sucursal.consecND--;
+                                    db.SaveChanges();
+                                    break;
+                                }
+                            case "03":
+                                {
+                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                    Sucursal.consecNC--;
+                                    db.SaveChanges();
+                                    break;
+                                }
+                            case "04":
+                                {
+                                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                                    Sucursal.consecTiq--;
+                                    db.SaveChanges();
+                                    break;
+                                }
+                        }
                     }
+                       
                     //Se vuelve a enviar en el caso de que haya existido un error
                     t.Commit();
                     if( Factura.code != 1)
@@ -993,7 +1052,7 @@ namespace WAConectorAPI.Controllers
                         cliente.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                         try
                         {
-                            HttpResponseMessage response = await cliente.PutAsync(parametros.urlCyber, httpContent);
+                            HttpResponseMessage response = await cliente.PostAsync(parametros.urlCyber, httpContent);
 
                             if (response.IsSuccessStatusCode)
                             {
@@ -1169,6 +1228,7 @@ namespace WAConectorAPI.Controllers
         [Route("api/Documentos/ConsultarEstado")]
         public async System.Threading.Tasks.Task<HttpResponseMessage> GetEstadoAsync()
         {
+            var error = "";
             try
             {
                 var Documentos = db.EncDocumento.Where(a => a.RespuestaHacienda.ToLower().Contains("procesando") ).ToList();
@@ -1195,7 +1255,7 @@ namespace WAConectorAPI.Controllers
                             cliente.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                             try
                             {
-                                HttpResponseMessage response = await cliente.PutAsync(parametros.urlCyber, httpContent);
+                                HttpResponseMessage response = await cliente.PostAsync(parametros.urlCyber, httpContent);
 
                                 if (response.IsSuccessStatusCode)
                                 {
@@ -1266,6 +1326,16 @@ namespace WAConectorAPI.Controllers
                                     db.SaveChanges();
                                     //product = await response.Content.ReadAsAsync<ListaOrdenes>();
 
+                                }else
+                                {
+                                    BitacoraErrores be = new BitacoraErrores();
+                                    be.DocNum = item.DocEntry;
+                                    be.Type = item.TipoDocumento;
+                                    be.Descripcion = JsonConvert.SerializeObject(response);
+                                    be.StackTrace = JsonConvert.SerializeObject(xml);
+                                    be.Fecha = DateTime.Now;
+                                    db.BitacoraErrores.Add(be);
+                                    db.SaveChanges();
                                 }
 
                             }
@@ -1306,34 +1376,68 @@ namespace WAConectorAPI.Controllers
 
                             try
                             {
-                                var Cn4 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
-                                var Cmd4 = new SqlCommand();
-
-                                Cn4.Open();
-
-                                Cmd4.Connection = Cn4;
-                                if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                                if (metodo.ObtenerConfig("HANA") == "0")
                                 {
+                                    var Cn4 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
+                                    var Cmd4 = new SqlCommand();
 
-                                    Cmd4.CommandText = " Update OINV set " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+                                    Cn4.Open();
 
+                                    Cmd4.Connection = Cn4;
+                                    if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                                    {
+
+                                        Cmd4.CommandText = " Update OINV set " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+
+                                    }
+                                    else if (item.TipoDocumento == "03")
+                                    {
+                                        Cmd4.CommandText = " Update ORIN set " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+
+                                    }
+                                    else if (item.TipoDocumento == "08")
+                                    {
+
+                                        Cmd4.CommandText = " Update OPCH set " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+
+                                    }
+
+
+                                    Cmd4.ExecuteNonQuery();
+                                    Cn4.Close();
+                                    Cn4.Dispose();
                                 }
-                                else if (item.TipoDocumento == "03")
+                                else
                                 {
-                                    Cmd4.CommandText = " Update ORIN set " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+                                    var Cn4 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
+                                    var Cmd4 = new SqlCommand();
 
+                                    Cn4.Open();
+
+                                    Cmd4.Connection = Cn4;
+                                    if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                                    {
+
+                                        Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARFACTURA(" + item.DocEntry + ", ''P'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+                                        error = Cmd4.CommandText;
+                                    }
+                                    else if (item.TipoDocumento == "03")
+                                    {
+                                        Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARNOTA(" + item.DocEntry + ", ''P'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+
+                                    }
+                                    else if (item.TipoDocumento == "08")
+                                    {
+                                        Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARCOMPRA(" + item.DocEntry + ", ''P'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+ 
+                                    }
+
+
+                                    Cmd4.ExecuteNonQuery();
+                                    Cn4.Close();
+                                    Cn4.Dispose();
                                 }
-                                else if (item.TipoDocumento == "08")
-                                {
-
-                                    Cmd4.CommandText = " Update OPCH set " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
-
-                                }
-
-
-                                Cmd4.ExecuteNonQuery();
-                                Cn4.Close();
-                                Cn4.Dispose();
+                                   
 
                                 db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                                 item.sincronizadaSAP = true;
@@ -1344,7 +1448,7 @@ namespace WAConectorAPI.Controllers
                                 BitacoraErrores be = new BitacoraErrores();
                                 be.DocNum = item.consecutivoSAP;
                                 be.Type = item.TipoDocumento;
-                                be.Descripcion = ex.Message;
+                                be.Descripcion = ex.Message + " " + error ;
                                 be.StackTrace = ex.StackTrace;
                                 be.Fecha = DateTime.Now;
                                 db.BitacoraErrores.Add(be);
@@ -1385,64 +1489,133 @@ namespace WAConectorAPI.Controllers
                             db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                             if (resp2.data.ind_estado.Contains("aceptado"))
                             {
+
                                 item.RespuestaHacienda = resp2.data.ind_estado;
                                 item.XMLFirmado = resp2.data.respuesta_xml;
                                 item.code = resp2.code;
-                                var Cn5 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
-                                var Cmd5 = new SqlCommand();
 
-                                Cn5.Open();
-
-                                Cmd5.Connection = Cn5;
-                                if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                                if (metodo.ObtenerConfig("HANA") == "0")
                                 {
+                                    var Cn5 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
+                                    var Cmd5 = new SqlCommand();
 
-                                    Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+                                    Cn5.Open();
 
+                                    Cmd5.Connection = Cn5;
+                                    if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                                    {
+
+                                        Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+
+                                    }
+                                    else if (item.TipoDocumento == "03")
+                                    {
+                                        Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+
+                                    }
+                                    else if (item.TipoDocumento == "08")
+                                    {
+                                        Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+                                    }
+
+                                    Cmd5.ExecuteNonQuery();
+                                    Cn5.Close();
+                                    Cn5.Dispose();
                                 }
-                                else if (item.TipoDocumento == "03")
+                                else
                                 {
-                                    Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+                                    var Cn4 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
+                                    var Cmd4 = new SqlCommand();
 
-                                }
-                                else if (item.TipoDocumento == "08")
-                                {
-                                    Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
-                                }
+                                    Cn4.Open();
 
-                                Cmd5.ExecuteNonQuery();
-                                Cn5.Close();
-                                Cn5.Dispose();
+                                    Cmd4.Connection = Cn4;
+                                    if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                                    {
+
+                                        Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARFACTURA(" + item.DocEntry + ", ''A'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+                                        error = Cmd4.CommandText;
+                                    }
+                                    else if (item.TipoDocumento == "03")
+                                    {
+                                        Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARNOTA(" + item.DocEntry + ", ''A'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+
+                                    }
+                                    else if (item.TipoDocumento == "08")
+                                    {
+                                        Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARCOMPRA(" + item.DocEntry + ", ''A'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+
+                                    }
+
+
+                                    Cmd4.ExecuteNonQuery();
+                                    Cn4.Close();
+                                    Cn4.Dispose();
+                                }
+                                    
                             }
                             else
                             {
                                 item.RespuestaHacienda = resp2.data.ind_estado;
-
-                                var Cn5 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
-                                var Cmd5 = new SqlCommand();
-
-                                Cn5.Open();
-
-                                Cmd5.Connection = Cn5;
-                                if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                                if (metodo.ObtenerConfig("HANA") == "0")
                                 {
+                                    var Cn5 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
+                                    var Cmd5 = new SqlCommand();
 
-                                    Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+                                    Cn5.Open();
 
+                                    Cmd5.Connection = Cn5;
+                                    if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                                    {
+
+                                        Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+
+                                    }
+                                    else if (item.TipoDocumento == "03")
+                                    {
+                                        Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+
+                                    }
+                                    else if (item.TipoDocumento == "08")
+                                    {
+                                        Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+                                    }
+
+                                    Cmd5.ExecuteNonQuery();
+                                    Cn5.Close();
+                                    Cn5.Dispose();
                                 }
-                                else if (item.TipoDocumento == "03")
+                                else
                                 {
-                                    Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+                                    var Cn4 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
+                                    var Cmd4 = new SqlCommand();
 
-                                }
-                                else if (item.TipoDocumento == "08")
-                                {
-                                    Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
-                                }
+                                    Cn4.Open();
 
-                                Cmd5.ExecuteNonQuery();
-                                Cn5.Close();
-                                Cn5.Dispose();
+                                    Cmd4.Connection = Cn4;
+                                    if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                                    {
+
+                                        Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARFACTURA(" + item.DocEntry + ", ''R'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+                                        error = Cmd4.CommandText;
+                                    }
+                                    else if (item.TipoDocumento == "03")
+                                    {
+                                        Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARNOTA(" + item.DocEntry + ", ''R'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+
+                                    }
+                                    else if (item.TipoDocumento == "08")
+                                    {
+                                        Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARCOMPRA(" + item.DocEntry + ", ''R'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+
+                                    }
+
+
+                                    Cmd4.ExecuteNonQuery();
+                                    Cn4.Close();
+                                    Cn4.Dispose();
+                                }
+                                    
                             }
                             db.SaveChanges();
                         }
@@ -1453,7 +1626,14 @@ namespace WAConectorAPI.Controllers
                     }
                     catch (Exception ex)
                     {
-                         
+                        BitacoraErrores be = new BitacoraErrores();
+                        be.DocNum = "";
+                        be.Type = "";
+                        be.Descripcion = ex.Message + " " + error;
+                        be.StackTrace = ex.StackTrace;
+                        be.Fecha = DateTime.Now;
+                        db.BitacoraErrores.Add(be);
+                        db.SaveChanges();
 
                     }
 
@@ -1468,6 +1648,14 @@ namespace WAConectorAPI.Controllers
             }
             catch (Exception ex)
             {
+                BitacoraErrores be = new BitacoraErrores();
+                be.DocNum = "";
+                be.Type = "";
+                be.Descripcion = ex.Message;
+                be.StackTrace = ex.StackTrace;
+                be.Fecha = DateTime.Now;
+                db.BitacoraErrores.Add(be);
+                db.SaveChanges();
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
 
             }
@@ -1490,60 +1678,129 @@ namespace WAConectorAPI.Controllers
 
                     if(datos.ind_estado.Contains("aceptado"))
                     {
-                        var Cn5 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
-                        var Cmd5 = new SqlCommand();
 
-                        Cn5.Open();
-
-                        Cmd5.Connection = Cn5;
-                        if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                        if(metodo.ObtenerConfig("HANA") == "0")
                         {
+                            var Cn5 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
+                            var Cmd5 = new SqlCommand();
 
-                            Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda  + "'  where DocEntry = '" + item.DocEntry + "' ";
+                            Cn5.Open();
 
+                            Cmd5.Connection = Cn5;
+                            if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                            {
+
+                                Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+
+                            }
+                            else if (item.TipoDocumento == "03")
+                            {
+                                Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+
+                            }
+                            else if (item.TipoDocumento == "08")
+                            {
+                                Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+                            }
+
+                            Cmd5.ExecuteNonQuery();
+                            Cn5.Close();
+                            Cn5.Dispose();
                         }
-                        else if (item.TipoDocumento == "03")
+                        else
                         {
-                            Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+                            var Cn4 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
+                            var Cmd4 = new SqlCommand();
 
-                        }
-                        else if (item.TipoDocumento == "08")
-                        {
-                            Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'A', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
-                        }
+                            Cn4.Open();
 
-                        Cmd5.ExecuteNonQuery();
-                        Cn5.Close();
-                        Cn5.Dispose();
+                            Cmd4.Connection = Cn4;
+                            if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                            {
+
+                                Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARFACTURA(" + item.DocEntry + ", ''A'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+                         
+                            }
+                            else if (item.TipoDocumento == "03")
+                            {
+                                Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARNOTA(" + item.DocEntry + ", ''A'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+
+                            }
+                            else if (item.TipoDocumento == "08")
+                            {
+                                Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARCOMPRA(" + item.DocEntry + ", ''A'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+
+                            }
+
+
+                            Cmd4.ExecuteNonQuery();
+                            Cn4.Close();
+                            Cn4.Dispose();
+                        }
+                       
                         item.sincronizadaSAP = true;
                     }
                     else
                     {
-                        var Cn5 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
-                        var Cmd5 = new SqlCommand();
-
-                        Cn5.Open();
-
-                        Cmd5.Connection = Cn5;
-                        if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                        if (metodo.ObtenerConfig("HANA") == "0")
                         {
+                            var Cn5 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
+                            var Cmd5 = new SqlCommand();
 
-                            Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+                            Cn5.Open();
 
+                            Cmd5.Connection = Cn5;
+                            if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                            {
+
+                                Cmd5.CommandText = " Update OINV set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+
+                            }
+                            else if (item.TipoDocumento == "03")
+                            {
+                                Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+
+                            }
+                            else if (item.TipoDocumento == "08")
+                            {
+                                Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
+                            }
+
+                            Cmd5.ExecuteNonQuery();
+                            Cn5.Close();
+                            Cn5.Dispose();
                         }
-                        else if (item.TipoDocumento == "03")
+                        else
                         {
-                            Cmd5.CommandText = " Update ORIN set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "' where DocEntry = '" + item.DocEntry + "' ";
+                            var Cn4 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
+                            var Cmd4 = new SqlCommand();
 
-                        }
-                        else if (item.TipoDocumento == "08")
-                        {
-                            Cmd5.CommandText = " Update OPCH set " + parametros.CampoEstado + " = 'R', " + parametros.CampoClave + " = '" + item.ClaveHacienda + "', " + parametros.CampoConsecutivo + " = '" + item.ConsecutivoHacienda + "'  where DocEntry = '" + item.DocEntry + "' ";
-                        }
+                            Cn4.Open();
 
-                        Cmd5.ExecuteNonQuery();
-                        Cn5.Close();
-                        Cn5.Dispose();
+                            Cmd4.Connection = Cn4;
+                            if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
+                            {
+
+                                Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARFACTURA(" + item.DocEntry + ", ''R'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+                                 
+                            }
+                            else if (item.TipoDocumento == "03")
+                            {
+                                Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARNOTA(" + item.DocEntry + ", ''R'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+
+                            }
+                            else if (item.TipoDocumento == "08")
+                            {
+                                Cmd4.CommandText = " EXEC ('call \"TABLA_INTERMEDIA_DYD_SFS\".ACTUALIZARCOMPRA(" + item.DocEntry + ", ''R'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+
+                            }
+
+
+                            Cmd4.ExecuteNonQuery();
+                            Cn4.Close();
+                            Cn4.Dispose();
+                        }
+                         
                         item.sincronizadaSAP = true;
                     }
 

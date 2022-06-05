@@ -106,6 +106,43 @@ namespace WAConectorAPI.Controllers
            
         }
 
+        public string DevuelveCadenaHana(string CodSucursal)
+        {
+            try
+            {
+                
+                var Datos = db.ConexionSAP.Where(a => a.id == 2).FirstOrDefault();
+               // var sql =  "DSN=HANA64;"+"SERVERNODE=" + Datos.SQLServer+ ";UID=" + Datos.SQLUser +";PWD="+ Datos.SQLPass +";DATABASENAME=" +Datos.SQLBD + ";";
+                var sql = "DSN=HANA64;Server=" + Datos.SQLServer+ ";UserName=" + Datos.SQLUser + ";Password=" + Datos.SQLPass;
+
+
+                return sql;
+            }
+            catch (Exception ex)
+            {
+
+                return ex.StackTrace;
+            }
+        }
+
+        public string DevuelveSCHEMA(string CodSucursal)
+        {
+            try
+            {
+
+                var Datos = db.ConexionSAP.Where(a => a.id == 2).FirstOrDefault();
+                var sql = Datos.SQLBD;
+
+
+                return sql;
+            }
+            catch (Exception ex)
+            {
+
+                return ex.StackTrace;
+            }
+        }
+
 
         public MakeXML RellenarXML(EncDocumento enc, DetDocumento[] det, bool FCE = false)
         {
@@ -122,7 +159,7 @@ namespace WAConectorAPI.Controllers
                 xml.clave.sucursal = Sucursal.codSuc;
                 xml.clave.terminal = Sucursal.Terminal;
                 xml.clave.tipo = enc.TipoDocumento;
-                xml.clave.comprobante = enc.consecutivoInterno.ToString();
+                xml.clave.comprobante = enc.consecutivoInterno.ToString().Replace(",", ".");
                 xml.clave.pais = Sucursal.codPais;
                 xml.clave.dia = (enc.Fecha.Value.Day < 10 ? "0" + enc.Fecha.Value.Day.ToString() : enc.Fecha.Value.Day.ToString()).ToString();
                 xml.clave.mes = (enc.Fecha.Value.Month < 10 ? "0" + enc.Fecha.Value.Month.ToString() : enc.Fecha.Value.Month.ToString()).ToString();
@@ -136,7 +173,7 @@ namespace WAConectorAPI.Controllers
                 xml.encabezado.codigo_actividad = enc.CodActividadEconomica;
                 xml.encabezado.fecha = enc.Fecha.Value.ToString("yyyy-MM-ddThh:mm:ss-06:00");
                 xml.encabezado.condicion_venta = enc.condicionVenta;
-                xml.encabezado.plazo_credito = enc.plazoCredito.ToString();
+                xml.encabezado.plazo_credito = enc.plazoCredito.ToString().Replace(",", ".");
                 xml.encabezado.medio_pago = enc.medioPago;
 
 
@@ -262,19 +299,19 @@ namespace WAConectorAPI.Controllers
 
                     
 
-                    de.cantidad = Math.Round(item.cantidad,2).ToString();
+                    de.cantidad = Math.Round(item.cantidad,2).ToString().Replace(",",".");
                     de.unidad_medida = item.unidadMedida;
                     de.unidad_medida_comercial = item.unidadMedidaComercial;
                     de.detalle = item.NomPro;
-                    de.precio_unitario = Math.Round(item.PrecioUnitario,2).ToString();
-                    de.monto_total = item.MontoTotal.ToString();
+                    de.precio_unitario = Math.Round(item.PrecioUnitario,2).ToString().Replace(",", ".");
+                    de.monto_total = item.MontoTotal.ToString().Replace(",", ".");
                     de.descuento = new descuento[1];
                     descuento desc = new descuento();
-                    desc.monto = item.MontoDescuento.ToString();
+                    desc.monto = item.MontoDescuento.ToString().Replace(",", ".");
                     desc.naturaleza = item.NaturalezaDescuento;
                     de.descuento[0] = desc;
 
-                    de.subtotal = item.SubTotal.ToString();
+                    de.subtotal = item.SubTotal.ToString().Replace(",", ".");
                     
                    
                     if(enc.TipoDocumento == "09")
@@ -284,17 +321,17 @@ namespace WAConectorAPI.Controllers
                     }
                     else
                     {
-                        de.baseimponible = item.baseImponible.ToString();
+                        de.baseimponible = item.baseImponible.ToString().Replace(",", ".");
                         de.impuestos = new impuestos[1];
                         impuestos imp = new impuestos();
                         var Impuesto = db.Impuestos.Where(a => a.id == item.idImpuesto).FirstOrDefault();
 
                         imp.codigo = Impuesto.codigo;
                         imp.codigotarifa = Impuesto.codigoTarifa;
-                        imp.tarifa = Impuesto.tarifa.ToString();
-                        imp.factoriva = item.factorIVA == 0 ? null : Math.Round(item.factorIVA).ToString();
-                        imp.monto = item.montoImpuesto.ToString();
-                        imp.exportacion = item.exportacion == 0 ? null : item.exportacion.ToString();
+                        imp.tarifa = Impuesto.tarifa.ToString().Replace(",", ".");
+                        imp.factoriva = item.factorIVA == 0 ? null : Math.Round(item.factorIVA).ToString().Replace(",", ".");
+                        imp.monto = item.montoImpuesto.ToString().Replace(",", ".");
+                        imp.exportacion = item.exportacion == 0 ? null : item.exportacion.ToString().Replace(",", ".");
                         if (!string.IsNullOrEmpty(item.exonNumdoc))
                         {
 
@@ -303,14 +340,14 @@ namespace WAConectorAPI.Controllers
                             imp.exoneracion.numerodocumento = item.exonNumdoc;
                             imp.exoneracion.nombreinstitucion = item.exonNomInst;
                             imp.exoneracion.fechaemision = item.exonFecEmi.ToString("yyyy-MM-ddThh:mm:ss-06:00");
-                            imp.exoneracion.porcentajeexoneracion = item.exonPorExo.ToString();
-                            imp.exoneracion.montoexoneracion = item.exonMonExo.ToString();
+                            imp.exoneracion.porcentajeexoneracion = item.exonPorExo.ToString().Replace(",", ".");
+                            imp.exoneracion.montoexoneracion = item.exonMonExo.ToString().Replace(",", ".");
                         }
                         de.impuestos[0] = imp;
 
                     }
-                    de.impuestoneto = item.impNeto.ToString();
-                    de.montototallinea = item.totalLinea.ToString();
+                    de.impuestoneto = item.impNeto.ToString().Replace(",", ".");
+                    de.montototallinea = item.totalLinea.ToString().Replace(",", ".");
 
                     xml.detalle[i] = de;
                     i++;
@@ -332,7 +369,7 @@ namespace WAConectorAPI.Controllers
                         oc.numeroidentificacion = "";
                         oc.detalle = item.detalle;
                         oc.porcentaje = "";
-                        oc.montocargo = item.monto.ToString();
+                        oc.montocargo = item.monto.ToString().Replace(",", ".");
 
 
                         xml.otroscargos[z] = oc;
@@ -342,23 +379,23 @@ namespace WAConectorAPI.Controllers
 
                 xml.resumen = new resumen();
                 xml.resumen.moneda = enc.moneda == "COL" ? "CRC" : enc.moneda;
-                xml.resumen.tipo_cambio = Math.Round(enc.tipoCambio.Value,2).ToString();
-                xml.resumen.totalserviciogravado = enc.totalserviciogravado == 0 ? null : enc.totalserviciogravado.ToString();
-                xml.resumen.totalservicioexento = enc.totalservicioexento.ToString();
-                xml.resumen.totalservicioexonerado = enc.totalservicioexonerado.ToString();
-                xml.resumen.totalmercaderiagravado = enc.totalmercaderiagravado == 0 ? null: enc.totalmercaderiagravado.ToString();
-                xml.resumen.totalmercaderiaexento = enc.totalmercaderiaexenta.ToString();
-                xml.resumen.totalmercaderiaexonerado = enc.totalmercaderiaexonerado == 0 ? null : enc.totalmercaderiaexonerado.ToString();
-                xml.resumen.totalgravado = enc.totalgravado.ToString();
-                xml.resumen.totalexento = enc.totalexento.ToString();
-                xml.resumen.totalexonerado = enc.totalexonerado.ToString();
-                xml.resumen.totalventa = enc.totalventa.ToString();
-                xml.resumen.totaldescuentos = enc.totaldescuentos.ToString();
-                xml.resumen.totalventaneta = enc.totalventaneta.ToString();
-                xml.resumen.totalimpuestos = enc.totalimpuestos.ToString();
-                xml.resumen.totalivadevuelto = enc.totalivadevuelto == 0 ? null :enc.totalivadevuelto.ToString();
-                xml.resumen.totalotroscargos = enc.totalotroscargos == 0 ? null : enc.totalotroscargos.ToString();
-                xml.resumen.totalcomprobante = enc.totalcomprobante.ToString();
+                xml.resumen.tipo_cambio = Math.Round(enc.tipoCambio.Value,2).ToString().Replace(",", ".");
+                xml.resumen.totalserviciogravado = enc.totalserviciogravado == 0 ? null : enc.totalserviciogravado.ToString().Replace(",", ".");
+                xml.resumen.totalservicioexento = enc.totalservicioexento.ToString().Replace(",", ".");
+                xml.resumen.totalservicioexonerado = enc.totalservicioexonerado.ToString().Replace(",", ".");
+                xml.resumen.totalmercaderiagravado = enc.totalmercaderiagravado == 0 ? null: enc.totalmercaderiagravado.ToString().Replace(",", ".");
+                xml.resumen.totalmercaderiaexento = enc.totalmercaderiaexenta.ToString().Replace(",", ".");
+                xml.resumen.totalmercaderiaexonerado = enc.totalmercaderiaexonerado == 0 ? null : enc.totalmercaderiaexonerado.ToString().Replace(",", ".");
+                xml.resumen.totalgravado = enc.totalgravado.ToString().Replace(",", ".");
+                xml.resumen.totalexento = enc.totalexento.ToString().Replace(",", ".");
+                xml.resumen.totalexonerado = enc.totalexonerado.ToString().Replace(",", ".");
+                xml.resumen.totalventa = enc.totalventa.ToString().Replace(",", ".");
+                xml.resumen.totaldescuentos = enc.totaldescuentos.ToString().Replace(",", ".");
+                xml.resumen.totalventaneta = enc.totalventaneta.ToString().Replace(",", ".");
+                xml.resumen.totalimpuestos = enc.totalimpuestos.ToString().Replace(",", ".");
+                xml.resumen.totalivadevuelto = enc.totalivadevuelto == 0 ? null :enc.totalivadevuelto.ToString().Replace(",", ".");
+                xml.resumen.totalotroscargos = enc.totalotroscargos == 0 ? null : enc.totalotroscargos.ToString().Replace(",", ".");
+                xml.resumen.totalcomprobante = enc.totalcomprobante.ToString().Replace(",", ".");
 
 
                 if(!string.IsNullOrEmpty(enc.RefNumeroDocumento) && enc.RefNumeroDocumento != "0")

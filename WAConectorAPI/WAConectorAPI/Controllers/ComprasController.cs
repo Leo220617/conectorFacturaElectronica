@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Odbc;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
@@ -267,7 +268,7 @@ namespace WAConectorAPI.Controllers
                 var consecInterno = 0;
 
                 SQL += parametros.FECEnc + DocNum + "  and t0.Series=" + parametros.SerieFEC;
-
+                  
                 var conexion = metodo.DevuelveCadena(CodSucursal);
 
                 SqlConnection Cn = new SqlConnection(conexion);
@@ -291,10 +292,21 @@ namespace WAConectorAPI.Controllers
 
                 if (Factura == null)
                 {
-                    consecInterno = Sucursal.consecFEC;
-                    db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
-                    Sucursal.consecFEC++;
-                    db.SaveChanges();
+                    if (metodo.ObtenerConfig("ValidarNumerico") == "1")
+                    {
+                        consecInterno = Sucursal.consecFEC;
+                        db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
+                        Sucursal.consecFEC++;
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecFEC;
+
+                    }
+
+
+
                     var DocEntry = Ds.Tables["Encabezado"].Rows[0]["DocEntry"].ToString();
                     enc.DocEntry = DocEntry;
                     enc.consecutivoInterno = consecInterno;
