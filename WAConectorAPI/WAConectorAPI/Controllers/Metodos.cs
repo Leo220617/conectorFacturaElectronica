@@ -212,11 +212,21 @@ namespace WAConectorAPI.Controllers
                         xml.receptor = new receptor();
                         xml.receptor.nombre = enc.CardName;
 
-                        //Generacion del nodo hijo de receptor de identificacion
-                        xml.receptor.identificacion = new identificacion();
-                        xml.receptor.identificacion.tipo = enc.TipoIdentificacion;
-                        xml.receptor.identificacion.numero = enc.LicTradNum;
-                        xml.receptor.correo_electronico = enc.Email;
+                        if(enc.LicTradNum.Length > 12 && enc.TipoDocumento == "09")
+                        {
+                            xml.receptor.correo_electronico = enc.Email;
+                            xml.receptor.IdentificacionExtranjero = enc.LicTradNum;
+                            xml.receptor.sennas_extranjero = "ninguna";
+                        }
+                        else
+                        {
+                            //Generacion del nodo hijo de receptor de identificacion
+                            xml.receptor.identificacion = new identificacion();
+                            xml.receptor.identificacion.tipo = enc.TipoIdentificacion;
+                            xml.receptor.identificacion.numero = enc.LicTradNum;
+                        }
+                        
+                        
                     }
                     else
                     {
@@ -288,7 +298,7 @@ namespace WAConectorAPI.Controllers
                     de.partida = item.partidaArancelaria.ToString();
                     de.codigo_hacienda = item.CodCabys;
 
-                    if(!string.IsNullOrEmpty( item.codPro) && !string.IsNullOrEmpty(item.tipoCod))
+                    if(!string.IsNullOrEmpty(item.codPro) && !string.IsNullOrEmpty(item.tipoCod))
                     {
                         de.codigo = new codigos[1];
                         codigos cod = new codigos();

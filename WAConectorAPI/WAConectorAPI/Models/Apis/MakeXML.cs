@@ -82,7 +82,7 @@ namespace WAConectorAPI.Models
         public identificacion identificacion { get; set; }
         public string IdentificacionExtranjero { get; set; }
         public string correo_electronico { get; set; }
-
+        public string sennas_extranjero { get; set; }
     }
 
     public class codigos

@@ -305,6 +305,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Apis\cuerpoRespuesta.cs" />
+    <Compile Include="Models\Apis\HaciendaRespuestaOtrolink.cs" />
     <Compile Include="Models\Apis\MakeXML.cs" />
     <Compile Include="Models\Apis\MakeXMLAceptacionFactura.cs" />
     <Compile Include="Models\Apis\MakeXMLReenvioFacturas.cs" />

@@ -31,7 +31,7 @@ namespace WAConectorAPI.Models.ModelCliente
         public string CardCode { get; set; }
         [StringLength(100)]
         public string CardName { get; set; }
-        [StringLength(12)]
+        [StringLength(20)]
         public string LicTradNum { get; set; }
         [StringLength(100)]
         public string Email { get; set; }
