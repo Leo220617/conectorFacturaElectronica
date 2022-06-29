@@ -35,7 +35,14 @@ namespace WAConectorAPI.Controllers
                 var Compras = db.BandejaEntrada.Where(a => (filtro.FechaInicial != time ? a.FechaIngreso >= filtro.FechaInicial : true) && (filtro.FechaFinal != time ? a.FechaIngreso <= filtro.FechaFinal : true) && a.XmlConfirmacion != null).ToList();
 
 
-
+                if (!string.IsNullOrEmpty(filtro.Estado))
+                {
+                    if (filtro.Estado != "NULL")
+                    {
+                        Compras = Compras.Where(a => a.Procesado == filtro.Estado).ToList();
+                    }
+                    
+                }
 
                 return Request.CreateResponse(HttpStatusCode.OK, Compras);
 

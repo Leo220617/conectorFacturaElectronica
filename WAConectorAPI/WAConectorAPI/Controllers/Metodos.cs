@@ -212,7 +212,7 @@ namespace WAConectorAPI.Controllers
                         xml.receptor = new receptor();
                         xml.receptor.nombre = enc.CardName;
 
-                        if(enc.LicTradNum.Length > 12 && enc.TipoDocumento == "09")
+                        if(enc.LicTradNum.Length > 12 && (enc.TipoDocumento == "09" || enc.TipoDocumento == "03" || enc.TipoDocumento == "02"))
                         {
                             xml.receptor.correo_electronico = enc.Email;
                             xml.receptor.IdentificacionExtranjero = enc.LicTradNum;

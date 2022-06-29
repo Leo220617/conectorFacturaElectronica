@@ -140,7 +140,16 @@ namespace WAConectorAPI.Controllers
                 }
                 catch (Exception)
                 {
-                    facturaxml.Impuesto = Convert.ToDecimal(TImpuesto.Replace(".", ","));
+                    try
+                    {
+                        facturaxml.Impuesto = Convert.ToDecimal(TImpuesto.Replace(".", ","));
+                    }
+                    catch (Exception)
+                    {
+
+                        facturaxml.Impuesto = 0;
+                    }
+                    
 
                 }
                  
