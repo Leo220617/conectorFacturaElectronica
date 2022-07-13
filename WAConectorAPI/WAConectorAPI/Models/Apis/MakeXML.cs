@@ -15,6 +15,7 @@ namespace WAConectorAPI.Models
         public detalleP[] detalle { get; set; }
         public otroscargos[] otroscargos { get; set; }
         public resumen resumen { get; set; }
+        public compra_entrega compra_entrega { get; set; }
         public referencia[] referencia { get; set; }
         public otros[] otros { get; set; }
         public envio envio { get; set; }
@@ -203,6 +204,11 @@ namespace WAConectorAPI.Models
         public emisorF emisor { get; set; }
         public receptorF receptor { get; set; }
         public string logo { get; set; }
-        
+        public string texto { get; set; }
+
+    }
+    public class compra_entrega
+    {
+        public string numeroorden { get; set; }
     }
 }

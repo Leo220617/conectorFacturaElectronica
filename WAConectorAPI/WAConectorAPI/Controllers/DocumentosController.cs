@@ -282,11 +282,38 @@ namespace WAConectorAPI.Controllers
                     enc.RefRazon = Ds.Tables["Encabezado"].Rows[0]["Comentario"].ToString();
                     enc.RefFechaEmision = DateTime.Now;
                     enc.procesadaHacienda = false;
+                    try
+                    {
+                        enc.Comentarios = G.Base64Encode( Ds.Tables["Encabezado"].Rows[0]["PDFComentario"].ToString());
+                    }
+                    catch (Exception)
+                    {
 
+                        enc.Comentarios = "";
+                    }
                     
+
 
                     db.EncDocumento.Add(enc);
                     db.SaveChanges();
+
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(Ds.Tables["Encabezado"].Rows[0]["OC"].ToString()))
+                        {
+                            OtrosTextos ot = new OtrosTextos();
+                            ot.idEncabezado = enc.id;
+                            ot.codigo = "OC";
+                            ot.detalle = Ds.Tables["Encabezado"].Rows[0]["OC"].ToString();
+                            db.OtrosTextos.Add(ot);
+                            db.SaveChanges();
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+                        
+                    }
 
                     try
                     {

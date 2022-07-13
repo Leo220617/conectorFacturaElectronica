@@ -407,7 +407,13 @@ namespace WAConectorAPI.Controllers
                 xml.resumen.totalotroscargos = enc.totalotroscargos == 0 ? null : enc.totalotroscargos.ToString().Replace(",", ".");
                 xml.resumen.totalcomprobante = enc.totalcomprobante.ToString().Replace(",", ".");
 
-
+                var comprasEntregas = db.OtrosTextos.Where(a => a.idEncabezado == enc.id && a.codigo == "OC").FirstOrDefault();
+                if(comprasEntregas != null)
+                {
+                    xml.compra_entrega = new compra_entrega();
+                    xml.compra_entrega.numeroorden = comprasEntregas.detalle;
+                }
+                
                 if(!string.IsNullOrEmpty(enc.RefNumeroDocumento) && enc.RefNumeroDocumento != "0")
                 {
                     xml.referencia = new referencia[1];
@@ -423,7 +429,7 @@ namespace WAConectorAPI.Controllers
 
 
 
-                var OtrosTexto = db.OtrosTextos.Where(a => a.idEncabezado == enc.id).ToList();
+                var OtrosTexto = db.OtrosTextos.Where(a => a.idEncabezado == enc.id && a.codigo != "OC").ToList();
 
                 if (OtrosTexto.Count() > 0)
                 {
@@ -457,7 +463,7 @@ namespace WAConectorAPI.Controllers
                     xml.envio.receptor.correo = Sucursal.Correo;
                 }
                 xml.envio.logo = Sucursal.Logo;
-                
+                xml.envio.texto = enc.Comentarios;
 
 
                 return xml;

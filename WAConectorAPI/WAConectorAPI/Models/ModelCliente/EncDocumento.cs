@@ -124,5 +124,6 @@ namespace WAConectorAPI.Models.ModelCliente
         public int code { get; set; }
         public string JSON { get; set; }
         public bool sincronizadaSAP { get; set; }
+        public string Comentarios { get; set; }
     }
 }
