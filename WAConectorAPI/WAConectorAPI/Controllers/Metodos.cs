@@ -212,7 +212,8 @@ namespace WAConectorAPI.Controllers
                         xml.receptor = new receptor();
                         xml.receptor.nombre = enc.CardName;
 
-                        if(enc.LicTradNum.Length > 12 && (enc.TipoDocumento == "09" || enc.TipoDocumento == "03" || enc.TipoDocumento == "02"))
+                        if(enc.TipoIdentificacion == "EX")
+                       // if(enc.LicTradNum.Length >= 12 && (enc.TipoDocumento == "09" || enc.TipoDocumento == "03" || enc.TipoDocumento == "02"))
                         {
                             xml.receptor.correo_electronico = enc.Email;
                             xml.receptor.IdentificacionExtranjero = enc.LicTradNum;
@@ -407,12 +408,7 @@ namespace WAConectorAPI.Controllers
                 xml.resumen.totalotroscargos = enc.totalotroscargos == 0 ? null : enc.totalotroscargos.ToString().Replace(",", ".");
                 xml.resumen.totalcomprobante = enc.totalcomprobante.ToString().Replace(",", ".");
 
-                var comprasEntregas = db.OtrosTextos.Where(a => a.idEncabezado == enc.id && a.codigo == "OC").FirstOrDefault();
-                if(comprasEntregas != null)
-                {
-                    xml.compra_entrega = new compra_entrega();
-                    xml.compra_entrega.numeroorden = comprasEntregas.detalle;
-                }
+              
                 
                 if(!string.IsNullOrEmpty(enc.RefNumeroDocumento) && enc.RefNumeroDocumento != "0")
                 {
@@ -429,11 +425,27 @@ namespace WAConectorAPI.Controllers
 
 
 
-                var OtrosTexto = db.OtrosTextos.Where(a => a.idEncabezado == enc.id && a.codigo != "OC").ToList();
-
+                var OtrosTexto = db.OtrosTextos.Where(a => a.idEncabezado == enc.id ).ToList();
+                var comprasEntregas = db.OtrosTextos.Where(a => a.idEncabezado == enc.id && a.codigo == "OC").FirstOrDefault();
+                
                 if (OtrosTexto.Count() > 0)
                 {
+                    //if(comprasEntregas != null)
+                    //{
+                    //    var cantidad = OtrosTexto.Count() + 1;
+                    //    xml.otros = new otros[cantidad];
+                    //}
+                    //else
+                    //{
+                    //    xml.otros = new otros[OtrosTexto.Count()];
+
+                    //}
                     xml.otros = new otros[OtrosTexto.Count()];
+
+                    if(comprasEntregas != null)
+                    {
+                        OtrosTexto.Remove(comprasEntregas);
+                    }
 
                     var z = 0;
                     foreach (var item in OtrosTexto)
@@ -447,6 +459,15 @@ namespace WAConectorAPI.Controllers
                         xml.otros[z] = oc;
                         z++;
                     }
+
+                    if(comprasEntregas != null)
+                    {
+                        otros oc = new otros();
+                        oc.codigo = "CECR_TPL_ORDEN";
+                        oc.texto = comprasEntregas.detalle;
+                        xml.otros[z] = oc;
+                    }
+
                 }
 
                 xml.envio = new envio();

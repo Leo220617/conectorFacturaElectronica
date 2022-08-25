@@ -257,6 +257,21 @@ namespace WAConectorAPI.Controllers
                     }
 
 
+                    try
+                    {
+                        var tipoIdentificacion = Ds.Tables["Encabezado"].Rows[0]["TipoIdentificacion"].ToString();
+                        if(tipoIdentificacion == "EX")
+                        {
+                            enc.TipoIdentificacion = tipoIdentificacion;
+
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+                       
+                    }
+
                     if(metodo.ObtenerConfig("ValidarCedula") == "1")
                     {
                         if(string.IsNullOrEmpty(enc.TipoIdentificacion)) //Preguntamos si viene vacio la identificacion para hacerlo tiquete
@@ -970,7 +985,7 @@ namespace WAConectorAPI.Controllers
                             db.Entry(enc).State = System.Data.Entity.EntityState.Modified;
                             enc.procesadaHacienda = true;
                             enc.code = resp.code;
-                            enc.RespuestaHacienda = resp.hacienda_mensaje;
+                            enc.RespuestaHacienda = resp.hacienda_mensaje == null ? resp.xml_error : resp.hacienda_mensaje; //resp.hacienda_mensaje;
                             enc.XMLFirmado = resp.data;
                             enc.ClaveHacienda = resp.clave;
                             enc.JSON = JsonConvert.SerializeObject(xml);
@@ -1109,7 +1124,7 @@ namespace WAConectorAPI.Controllers
                                 db.Entry(Factura).State = System.Data.Entity.EntityState.Modified;
                                 Factura.procesadaHacienda = true;
                                 Factura.code = resp.code;
-                                Factura.RespuestaHacienda = resp.hacienda_mensaje;
+                                Factura.RespuestaHacienda = resp.hacienda_mensaje == null ? resp.xml_error : resp.hacienda_mensaje;// resp.hacienda_mensaje;
                                 Factura.XMLFirmado = resp.data;
                                 Factura.JSON = JsonConvert.SerializeObject(xml);
                                 Factura.ClaveHacienda = resp.clave;
@@ -1311,7 +1326,7 @@ namespace WAConectorAPI.Controllers
                                     db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                                     item.procesadaHacienda = true;
                                     item.code = resp.code;
-                                    item.RespuestaHacienda = resp.hacienda_mensaje;
+                                    item.RespuestaHacienda = resp.hacienda_mensaje == null ? resp.xml_error : resp.hacienda_mensaje; //resp.hacienda_mensaje;
                                     item.XMLFirmado = resp.data;
                                     item.JSON = JsonConvert.SerializeObject(xml);
                                     item.ClaveHacienda = resp.clave;
@@ -1512,7 +1527,7 @@ namespace WAConectorAPI.Controllers
                 }
 
 
-                var Documentos = db.EncDocumento.Where(a => a.RespuestaHacienda.ToLower().Contains("procesando")).ToList();
+                var Documentos = db.EncDocumento.Where(a => a.RespuestaHacienda.ToLower().Contains("procesando") && !a.XMLFirmado.ToLower().Contains("Error".ToLower())).ToList();
 
                 if(parametros.urlCyberRespHacienda.ToLower().Contains("consultarespuestahacienda") )
                 {

@@ -967,6 +967,49 @@ namespace WAConectorAPI.Controllers
         }
 
 
+        [Route("api/Compras/Correo")]
+        public async System.Threading.Tasks.Task<HttpResponseMessage> GetPruebaCorreo( )
+        {
+            try
+            {
+
+                G G = new G();
+                var Parametros = db.Parametros.FirstOrDefault();
+                var Correos = db.CorreosRecepcion.ToList();
+                var mensaje = "";
+                foreach (var item in Correos)
+                {
+
+                    try
+                    {
+                        using (ImapClient client = new ImapClient(item.RecepcionHostName, (int)(item.RecepcionPort),
+                               item.RecepcionEmail, item.RecepcionPassword, AuthMethod.Login, (bool)(item.RecepcionUseSSL)))
+                        {
+                            mensaje += "\n " + item.RecepcionEmail + " -> Acceso Correcto";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        mensaje += "\n " + item.RecepcionEmail + " -> " + ex.Message;
+
+
+                    }
+
+
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK, mensaje);
+
+            }
+            catch (Exception ex)
+            {
+
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
+
+
+
 
 
     }

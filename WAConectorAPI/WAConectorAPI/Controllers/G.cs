@@ -94,7 +94,10 @@ namespace WAConectorAPI.Controllers
             Regex GetXmlIdEmisor = new Regex("<Tipo>([^\"]*)</Tipo>");
 
             FacturaXml facturaxml = new FacturaXml();
+            string s = "<Fax xsi:nil=" + '"' + "true" + '"' + "/>";
+            xml = xml.Trim().Replace("<Telefono xsi:nil=\"", "").Replace("true\"", "").Replace(" />", "");
 
+            xml = xml.Trim().Replace("<Fax xsi:nil=\"", "").Replace("true\"", "").Replace(" />", "");
             try
             {
                 facturaxml.NumeroConsecutivo = GetXmlNumeroConsecutivo.Match(xml).ToString().Replace("<Clave>", "").Replace("</Clave>", "");
