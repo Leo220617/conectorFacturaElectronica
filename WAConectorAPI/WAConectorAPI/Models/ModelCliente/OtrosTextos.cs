@@ -15,7 +15,7 @@ namespace WAConectorAPI.Models.ModelCliente
         [StringLength(2)]
         public string codigo { get; set; }
 
-        [StringLength(50)]
+      
         public string detalle { get; set; }
     }
 }
