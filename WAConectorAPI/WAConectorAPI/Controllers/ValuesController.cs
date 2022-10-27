@@ -31,8 +31,32 @@ namespace WAConectorAPI.Controllers
                 return Request.CreateResponse(HttpStatusCode.OK,"ERror"  + ex);
             }
         }
+        [Route("api/Values/PDF")]
+        public async System.Threading.Tasks.Task<HttpResponseMessage> GetAsync([FromUri] DateTime FechaInicial, DateTime FechaFinal)
+        {
+            try
+            {
+                G G = new G();
+                ModelCliente db = new ModelCliente();
 
+                var Bandeja = db.BandejaEntrada.Where(a => a.FechaIngreso >= FechaInicial && a.FechaIngreso <= FechaFinal).ToList();
 
+                foreach(var item in Bandeja)
+                {
+                    db.Entry(item).State = System.Data.Entity.EntityState.Modified;
+                    item.XmlConfirmacion = G.GuardarPDF(item.Pdf, item.NumeroConsecutivo + "_" + item.NombreEmisor);
+                    db.SaveChanges();
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK);
+
+            }
+            catch (Exception ex)
+            {
+
+                return Request.CreateResponse(HttpStatusCode.OK, "Error" + ex);
+            }
+        }
 
         // PUT api/values/5
         public void Put(int id, [FromBody]string value)

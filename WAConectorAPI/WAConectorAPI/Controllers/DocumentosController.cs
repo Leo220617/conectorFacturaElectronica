@@ -274,7 +274,7 @@ namespace WAConectorAPI.Controllers
 
                     if(metodo.ObtenerConfig("ValidarCedula") == "1")
                     {
-                        if(string.IsNullOrEmpty(enc.TipoIdentificacion)) //Preguntamos si viene vacio la identificacion para hacerlo tiquete
+                        if(string.IsNullOrEmpty(enc.TipoIdentificacion) && enc.TipoDocumento == "01") //Preguntamos si viene vacio la identificacion para hacerlo tiquete
                         {
                             enc.TipoDocumento = "04";
                             db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
