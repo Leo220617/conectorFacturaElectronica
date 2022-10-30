@@ -27,7 +27,7 @@ namespace WAConectorAPI.Models.ModelCliente
         public DateTime? Fecha { get; set; }
 
         public string CodActividadEconomica { get; set; }
-        [StringLength(10)]
+        [StringLength(20)]
         public string CardCode { get; set; }
         [StringLength(100)]
         public string CardName { get; set; }

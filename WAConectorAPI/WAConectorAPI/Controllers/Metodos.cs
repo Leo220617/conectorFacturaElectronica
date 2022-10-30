@@ -9,7 +9,7 @@ using System.Net.Mail;
 using System.Web;
 using System.Web.Configuration;
 using WAConectorAPI.Models;
- 
+
 using WAConectorAPI.Models.ModelCliente;
 
 namespace WAConectorAPI.Controllers
@@ -64,11 +64,11 @@ namespace WAConectorAPI.Controllers
 
 
                 SmtpClient client = new SmtpClient();
-                client.Host = HostServer;  
-                client.Port = Puerto;  
+                client.Host = HostServer;
+                client.Port = Puerto;
                 client.UseDefaultCredentials = false;
                 client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                client.EnableSsl = EnableSSL;  
+                client.EnableSsl = EnableSSL;
                 client.Credentials = new NetworkCredential(UserName, Password);
 
                 client.Send(mail);
@@ -103,17 +103,17 @@ namespace WAConectorAPI.Controllers
 
                 return ex.StackTrace;
             }
-           
+
         }
 
         public string DevuelveCadenaHana(string CodSucursal)
         {
             try
             {
-                
+
                 var Datos = db.ConexionSAP.Where(a => a.id == 2).FirstOrDefault();
-               // var sql =  "DSN=HANA64;"+"SERVERNODE=" + Datos.SQLServer+ ";UID=" + Datos.SQLUser +";PWD="+ Datos.SQLPass +";DATABASENAME=" +Datos.SQLBD + ";";
-                var sql = "DSN=HANA64;Server=" + Datos.SQLServer+ ";UserName=" + Datos.SQLUser + ";Password=" + Datos.SQLPass;
+                // var sql =  "DSN=HANA64;"+"SERVERNODE=" + Datos.SQLServer+ ";UID=" + Datos.SQLUser +";PWD="+ Datos.SQLPass +";DATABASENAME=" +Datos.SQLBD + ";";
+                var sql = "DSN=HANA64;Server=" + Datos.SQLServer + ";UserName=" + Datos.SQLUser + ";Password=" + Datos.SQLPass;
 
 
                 return sql;
@@ -181,7 +181,7 @@ namespace WAConectorAPI.Controllers
 
                 xml.emisor = new emisor();
 
-                if(!FCE)
+                if (!FCE)
                 {
                     xml.emisor.nombre = Sucursal.Nombre;
                     //Generacion del nodo hijo de emisor de identificacion
@@ -212,8 +212,8 @@ namespace WAConectorAPI.Controllers
                         xml.receptor = new receptor();
                         xml.receptor.nombre = enc.CardName;
 
-                        if(enc.TipoIdentificacion == "EX")
-                       // if(enc.LicTradNum.Length >= 12 && (enc.TipoDocumento == "09" || enc.TipoDocumento == "03" || enc.TipoDocumento == "02"))
+                        if (enc.TipoIdentificacion == "EX")
+                        // if(enc.LicTradNum.Length >= 12 && (enc.TipoDocumento == "09" || enc.TipoDocumento == "03" || enc.TipoDocumento == "02"))
                         {
                             xml.receptor.correo_electronico = enc.Email;
                             xml.receptor.IdentificacionExtranjero = enc.LicTradNum;
@@ -226,8 +226,8 @@ namespace WAConectorAPI.Controllers
                             xml.receptor.identificacion.tipo = enc.TipoIdentificacion;
                             xml.receptor.identificacion.numero = enc.LicTradNum;
                         }
-                        
-                        
+
+
                     }
                     else
                     {
@@ -269,37 +269,37 @@ namespace WAConectorAPI.Controllers
                     var canton = db.Cantones.Where(a => a.NomCanton.ToLower().Contains(Canton.ToLower())).FirstOrDefault().CodCanton;
                     xml.emisor.ubicacion.distrito = db.Distritos.Where(a => a.NomDistrito.ToLower().Contains(Distrito.ToLower()) && a.CodCanton == canton && a.CodProvincia == Provincia).FirstOrDefault().CodDistrito.ToString();
                     var distrito = db.Distritos.Where(a => a.NomDistrito.ToLower().Contains(Distrito.ToLower()) && a.CodCanton == canton && a.CodProvincia == Provincia).FirstOrDefault().CodDistrito;
-                    xml.emisor.ubicacion.barrio = db.Barrios.Where(a => a.NomBarrio.ToLower().Contains(Distrito.ToLower())).FirstOrDefault() != null ? db.Barrios.Where(a => a.NomBarrio.ToLower().Contains(Distrito.ToLower())).FirstOrDefault().CodBarrio.ToString() : "1" ; 
+                    xml.emisor.ubicacion.barrio = db.Barrios.Where(a => a.NomBarrio.ToLower().Contains(Distrito.ToLower())).FirstOrDefault() != null ? db.Barrios.Where(a => a.NomBarrio.ToLower().Contains(Distrito.ToLower())).FirstOrDefault().CodBarrio.ToString() : "1";
                     xml.emisor.ubicacion.sennas = Ds.Tables["Proveedor"].Rows[0]["Street"].ToString();
 
                     //Generacion del nodo de receptor
                     xml.receptor = new receptor();
-                        xml.receptor.nombre = Sucursal.Nombre;
+                    xml.receptor.nombre = Sucursal.Nombre;
 
                     //Generacion del nodo hijo de receptor de identificacion
-                        xml.receptor.identificacion = new identificacion();
-                        xml.receptor.identificacion.tipo = Sucursal.TipoCedula;
-                        xml.receptor.identificacion.numero = Sucursal.Cedula;
-                        xml.receptor.correo_electronico = Sucursal.Correo;
+                    xml.receptor.identificacion = new identificacion();
+                    xml.receptor.identificacion.tipo = Sucursal.TipoCedula;
+                    xml.receptor.identificacion.numero = Sucursal.Cedula;
+                    xml.receptor.correo_electronico = Sucursal.Correo;
 
-                       
-                    
+
+
                 }
 
-             
-              
+
+
 
                 xml.detalle = new detalleP[det.Length];
 
                 int i = 0;
-                foreach(var item in det)
+                foreach (var item in det)
                 {
                     detalleP de = new detalleP();
                     de.numero = item.NumLinea.ToString();
                     de.partida = item.partidaArancelaria.ToString();
                     de.codigo_hacienda = item.CodCabys;
 
-                    if(!string.IsNullOrEmpty(item.codPro) && !string.IsNullOrEmpty(item.tipoCod))
+                    if (!string.IsNullOrEmpty(item.codPro) && !string.IsNullOrEmpty(item.tipoCod))
                     {
                         de.codigo = new codigos[1];
                         codigos cod = new codigos();
@@ -308,13 +308,13 @@ namespace WAConectorAPI.Controllers
                         de.codigo[0] = cod;
                     }
 
-                    
 
-                    de.cantidad = Math.Round(item.cantidad,2).ToString().Replace(",",".");
+
+                    de.cantidad = Math.Round(item.cantidad, 2).ToString().Replace(",", ".");
                     de.unidad_medida = item.unidadMedida;
                     de.unidad_medida_comercial = item.unidadMedidaComercial;
                     de.detalle = item.NomPro;
-                    de.precio_unitario = Math.Round(item.PrecioUnitario,2).ToString().Replace(",", ".");
+                    de.precio_unitario = Math.Round(item.PrecioUnitario, 2).ToString().Replace(",", ".");
                     de.monto_total = item.MontoTotal.ToString().Replace(",", ".");
                     de.descuento = new descuento[1];
                     descuento desc = new descuento();
@@ -323,9 +323,9 @@ namespace WAConectorAPI.Controllers
                     de.descuento[0] = desc;
 
                     de.subtotal = item.SubTotal.ToString().Replace(",", ".");
-                    
-                   
-                    if(enc.TipoDocumento == "09")
+
+
+                    if (enc.TipoDocumento == "09")
                     {
                         de.baseimponible = null;
                         de.impuestos = null;
@@ -367,12 +367,12 @@ namespace WAConectorAPI.Controllers
 
                 var OtrosCargos = db.OtrosCargos.Where(a => a.idEncabezado == enc.id).ToList();
 
-                if(OtrosCargos.Count() > 0)
+                if (OtrosCargos.Count() > 0)
                 {
                     xml.otroscargos = new otroscargos[OtrosCargos.Count()];
 
                     var z = 0;
-                    foreach(var item in OtrosCargos)
+                    foreach (var item in OtrosCargos)
                     {
                         otroscargos oc = new otroscargos();
                         oc.tipodocumento = item.tipoDocumento;
@@ -390,11 +390,11 @@ namespace WAConectorAPI.Controllers
 
                 xml.resumen = new resumen();
                 xml.resumen.moneda = enc.moneda == "COL" ? "CRC" : enc.moneda;
-                xml.resumen.tipo_cambio = Math.Round(enc.tipoCambio.Value,2).ToString().Replace(",", ".");
+                xml.resumen.tipo_cambio = Math.Round(enc.tipoCambio.Value, 2).ToString().Replace(",", ".");
                 xml.resumen.totalserviciogravado = enc.totalserviciogravado == 0 ? null : enc.totalserviciogravado.ToString().Replace(",", ".");
                 xml.resumen.totalservicioexento = enc.totalservicioexento.ToString().Replace(",", ".");
                 xml.resumen.totalservicioexonerado = enc.totalservicioexonerado.ToString().Replace(",", ".");
-                xml.resumen.totalmercaderiagravado = enc.totalmercaderiagravado == 0 ? null: enc.totalmercaderiagravado.ToString().Replace(",", ".");
+                xml.resumen.totalmercaderiagravado = enc.totalmercaderiagravado == 0 ? null : enc.totalmercaderiagravado.ToString().Replace(",", ".");
                 xml.resumen.totalmercaderiaexento = enc.totalmercaderiaexenta.ToString().Replace(",", ".");
                 xml.resumen.totalmercaderiaexonerado = enc.totalmercaderiaexonerado == 0 ? null : enc.totalmercaderiaexonerado.ToString().Replace(",", ".");
                 xml.resumen.totalgravado = enc.totalgravado.ToString().Replace(",", ".");
@@ -404,13 +404,13 @@ namespace WAConectorAPI.Controllers
                 xml.resumen.totaldescuentos = enc.totaldescuentos.ToString().Replace(",", ".");
                 xml.resumen.totalventaneta = enc.totalventaneta.ToString().Replace(",", ".");
                 xml.resumen.totalimpuestos = enc.totalimpuestos.ToString().Replace(",", ".");
-                xml.resumen.totalivadevuelto = enc.totalivadevuelto == 0 ? null :enc.totalivadevuelto.ToString().Replace(",", ".");
+                xml.resumen.totalivadevuelto = enc.totalivadevuelto == 0 ? null : enc.totalivadevuelto.ToString().Replace(",", ".");
                 xml.resumen.totalotroscargos = enc.totalotroscargos == 0 ? null : enc.totalotroscargos.ToString().Replace(",", ".");
                 xml.resumen.totalcomprobante = enc.totalcomprobante.ToString().Replace(",", ".");
 
-              
-                
-                if(!string.IsNullOrEmpty(enc.RefNumeroDocumento) && enc.RefNumeroDocumento != "0")
+
+
+                if (!string.IsNullOrEmpty(enc.RefNumeroDocumento) && enc.RefNumeroDocumento != "0")
                 {
                     xml.referencia = new referencia[1];
                     xml.referencia[0] = new referencia();
@@ -425,9 +425,9 @@ namespace WAConectorAPI.Controllers
 
 
 
-                var OtrosTexto = db.OtrosTextos.Where(a => a.idEncabezado == enc.id ).ToList();
+                var OtrosTexto = db.OtrosTextos.Where(a => a.idEncabezado == enc.id).ToList();
                 var comprasEntregas = db.OtrosTextos.Where(a => a.idEncabezado == enc.id && a.codigo == "OC").FirstOrDefault();
-                
+
                 if (OtrosTexto.Count() > 0)
                 {
                     //if(comprasEntregas != null)
@@ -442,7 +442,7 @@ namespace WAConectorAPI.Controllers
                     //}
                     xml.otros = new otros[OtrosTexto.Count()];
 
-                    if(comprasEntregas != null)
+                    if (comprasEntregas != null)
                     {
                         OtrosTexto.Remove(comprasEntregas);
                     }
@@ -453,14 +453,14 @@ namespace WAConectorAPI.Controllers
                         otros oc = new otros();
                         oc.codigo = item.codigo;
                         oc.texto = item.detalle;
-                        
+
 
 
                         xml.otros[z] = oc;
                         z++;
                     }
 
-                    if(comprasEntregas != null)
+                    if (comprasEntregas != null)
                     {
                         otros oc = new otros();
                         oc.codigo = "CECR_TPL_ORDEN";
@@ -475,11 +475,12 @@ namespace WAConectorAPI.Controllers
                 xml.envio.emisor = new emisorF();
                 xml.envio.emisor.correo = Sucursal.Correo;
                 xml.envio.receptor = new receptorF();
-                if(!string.IsNullOrEmpty(enc.Email))
+                if (!string.IsNullOrEmpty(enc.Email))
                 {
-                     xml.envio.receptor.correo = enc.Email;
+                    xml.envio.receptor.correo = enc.Email;
 
-                }else
+                }
+                else
                 {
                     xml.envio.receptor.correo = Sucursal.Correo;
                 }
@@ -501,12 +502,12 @@ namespace WAConectorAPI.Controllers
                 db.SaveChanges();
                 return new MakeXML();
             }
-           
+
 
         }
 
 
-         
+
 
         public string GeneraNumero(int cant = 8)
         {
@@ -515,7 +516,7 @@ namespace WAConectorAPI.Controllers
             var random = new Random(seed);
             for (int i = 0; i < cant; i++)
             {
-                 
+
 
                 codigo += random.Next(0, 10);
             }
@@ -526,7 +527,7 @@ namespace WAConectorAPI.Controllers
 
 
 
-        public  string ObtenerConfig(string v)
+        public string ObtenerConfig(string v)
         {
             try
             {
