@@ -392,21 +392,21 @@ namespace WAConectorAPI.Controllers
                 xml.resumen.moneda = enc.moneda == "COL" ? "CRC" : enc.moneda;
                 xml.resumen.tipo_cambio = Math.Round(enc.tipoCambio.Value, 2).ToString().Replace(",", ".");
                 xml.resumen.totalserviciogravado = enc.totalserviciogravado == 0 ? null : enc.totalserviciogravado.ToString().Replace(",", ".");
-                xml.resumen.totalservicioexento = enc.totalservicioexento.ToString().Replace(",", ".");
-                xml.resumen.totalservicioexonerado = enc.totalservicioexonerado.ToString().Replace(",", ".");
+                xml.resumen.totalservicioexento = enc.totalservicioexento == 0 ? null : enc.totalservicioexento.ToString().Replace(",", ".");
+                xml.resumen.totalservicioexonerado = enc.totalservicioexonerado == 0 ? null : enc.totalservicioexonerado.ToString().Replace(",", ".");
                 xml.resumen.totalmercaderiagravado = enc.totalmercaderiagravado == 0 ? null : enc.totalmercaderiagravado.ToString().Replace(",", ".");
-                xml.resumen.totalmercaderiaexento = enc.totalmercaderiaexenta.ToString().Replace(",", ".");
+                xml.resumen.totalmercaderiaexento = enc.totalmercaderiaexenta == 0 ? null : enc.totalmercaderiaexenta.ToString().Replace(",", ".");
                 xml.resumen.totalmercaderiaexonerado = enc.totalmercaderiaexonerado == 0 ? null : enc.totalmercaderiaexonerado.ToString().Replace(",", ".");
-                xml.resumen.totalgravado = enc.totalgravado.ToString().Replace(",", ".");
-                xml.resumen.totalexento = enc.totalexento.ToString().Replace(",", ".");
-                xml.resumen.totalexonerado = enc.totalexonerado.ToString().Replace(",", ".");
-                xml.resumen.totalventa = enc.totalventa.ToString().Replace(",", ".");
-                xml.resumen.totaldescuentos = enc.totaldescuentos.ToString().Replace(",", ".");
-                xml.resumen.totalventaneta = enc.totalventaneta.ToString().Replace(",", ".");
-                xml.resumen.totalimpuestos = enc.totalimpuestos.ToString().Replace(",", ".");
+                xml.resumen.totalgravado = enc.totalgravado == 0 ? null : enc.totalgravado.ToString().Replace(",", ".");
+                xml.resumen.totalexento = enc.totalexento == 0 ? null : enc.totalexento.ToString().Replace(",", ".");
+                xml.resumen.totalexonerado = enc.totalexonerado == 0 ? null : enc.totalexonerado.ToString().Replace(",", ".");
+                xml.resumen.totalventa = enc.totalventa == 0 ? null : enc.totalventa.ToString().Replace(",", ".");
+                xml.resumen.totaldescuentos = enc.totaldescuentos == 0 ? null : enc.totaldescuentos.ToString().Replace(",", ".");
+                xml.resumen.totalventaneta = enc.totalventaneta == 0 ? null : enc.totalventaneta.ToString().Replace(",", ".");
+                xml.resumen.totalimpuestos = enc.totalimpuestos == 0 ? null : enc.totalimpuestos.ToString().Replace(",", ".");
                 xml.resumen.totalivadevuelto = enc.totalivadevuelto == 0 ? null : enc.totalivadevuelto.ToString().Replace(",", ".");
                 xml.resumen.totalotroscargos = enc.totalotroscargos == 0 ? null : enc.totalotroscargos.ToString().Replace(",", ".");
-                xml.resumen.totalcomprobante = enc.totalcomprobante.ToString().Replace(",", ".");
+                xml.resumen.totalcomprobante = enc.totalcomprobante == 0 ? null : enc.totalcomprobante.ToString().Replace(",", ".");
 
 
 
