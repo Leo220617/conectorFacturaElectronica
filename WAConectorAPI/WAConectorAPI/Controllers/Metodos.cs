@@ -397,8 +397,8 @@ namespace WAConectorAPI.Controllers
                 xml.resumen.totalmercaderiagravado = enc.totalmercaderiagravado == 0 ? null : enc.totalmercaderiagravado.ToString().Replace(",", ".");
                 xml.resumen.totalmercaderiaexento = enc.totalmercaderiaexenta == 0 ? null : enc.totalmercaderiaexenta.ToString().Replace(",", ".");
                 xml.resumen.totalmercaderiaexonerado = enc.totalmercaderiaexonerado == 0 ? null : enc.totalmercaderiaexonerado.ToString().Replace(",", ".");
-                xml.resumen.totalgravado = enc.totalgravado == 0 ? null : enc.totalgravado.ToString().Replace(",", ".");
-                xml.resumen.totalexento = enc.totalexento == 0 ? null : enc.totalexento.ToString().Replace(",", ".");
+                xml.resumen.totalgravado =  enc.totalgravado.ToString().Replace(",", ".");
+                xml.resumen.totalexento =  enc.totalexento.ToString().Replace(",", ".");
                 xml.resumen.totalexonerado = enc.totalexonerado == 0 ? null : enc.totalexonerado.ToString().Replace(",", ".");
                 xml.resumen.totalventa = enc.totalventa == 0 ? null : enc.totalventa.ToString().Replace(",", ".");
                 xml.resumen.totaldescuentos = enc.totaldescuentos == 0 ? null : enc.totaldescuentos.ToString().Replace(",", ".");
