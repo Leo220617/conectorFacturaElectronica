@@ -108,7 +108,8 @@ namespace WAConectorAPI.Controllers
                                                 {
 
                                                     var datos = G.ObtenerDatosXmlRechazado(texto);
-                                                    datos.NumeroConsecutivo = datos.NumeroConsecutivo.Trim();
+                                                    datos.NumeroConsecutivo = datos.NumeroConsecutivo.TrimEnd();
+                                                    datos.Numero = datos.Numero.TrimEnd();
                                                     var Detalle = db.BandejaEntrada.Where(a => a.NumeroConsecutivo == datos.NumeroConsecutivo && a.IdEmisor == datos.Numero).FirstOrDefault();
                                                     if(datos.IdReceptor == db.Sucursales.FirstOrDefault().Cedula && Detalle == null && !string.IsNullOrEmpty(datos.NumeroConsecutivo))
                                                     {
