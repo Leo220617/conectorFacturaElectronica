@@ -64,5 +64,6 @@ namespace WAConectorAPI.Models.ModelCliente
         public string XMLRespuesta { get; set; }
         public string ClaveReceptor { get; set; }
         public string ConsecutivoReceptor { get; set; }
+        public int idAceptador { get; set; }
     }
 }

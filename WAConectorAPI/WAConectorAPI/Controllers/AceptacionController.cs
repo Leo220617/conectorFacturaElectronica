@@ -43,6 +43,10 @@ namespace WAConectorAPI.Controllers
                     }
                     
                 }
+                if(filtro.Codigo1 > 0)
+                {
+                    Compras = Compras.Where(a => a.idAceptador == filtro.Codigo1).ToList();
+                }
 
                 return Request.CreateResponse(HttpStatusCode.OK, Compras);
 
@@ -136,6 +140,7 @@ namespace WAConectorAPI.Controllers
 
 
                 db.Entry(Bandeja).State = System.Data.Entity.EntityState.Modified;
+                Bandeja.idAceptador = bandeja.idAceptador;
                 Bandeja.tipo = bandeja.tipo;
                 Bandeja.Mensaje = bandeja.Mensaje;
                 Bandeja.DetalleMensaje = bandeja.DetalleMensaje;

@@ -160,6 +160,7 @@ namespace WAConectorAPI.Controllers
                                                     }
                                                     bandeja = db.BandejaEntrada.Where(a => a.Id == idGeneral).FirstOrDefault();
                                                     db.Entry(bandeja).State = EntityState.Modified;
+                                                    bandeja.idAceptador = 0;
                                                     bandeja.impuestoAcreditar = 0;
                                                     bandeja.gastoAplicable = 0;
                                                     bandeja.CodigoActividad = db.Sucursales.FirstOrDefault().CodActividadComercial;
@@ -247,6 +248,10 @@ namespace WAConectorAPI.Controllers
                     Compras = Compras.Where(a => a.FechaIngreso <= filtro.FechaFinal).ToList();
                 }
 
+                if(filtro.Codigo1 > 0)
+                {
+                    Compras = Compras.Where(a => a.idAceptador == filtro.Codigo1).ToList();
+                }
 
                 return Request.CreateResponse(HttpStatusCode.OK, Compras);
 
