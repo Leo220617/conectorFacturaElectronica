@@ -97,8 +97,8 @@ namespace WAConectorAPI.Controllers
                                             {
                                                 var emailByteArray = G.Zip(texto);
 
-                                                decimal id = db.Database.SqlQuery<decimal>("Insert Into BandejaEntrada(XmlFactura, Procesado, Asunto, Remitente,Pdf,impuestoAcreditar,gastoAplicable) " +
-                                                        " VALUES (@EmailJson, 0, @Asunto, @Remitente, @Pdf,0,0); SELECT SCOPE_IDENTITY(); ",
+                                                decimal id = db.Database.SqlQuery<decimal>("Insert Into BandejaEntrada(XmlFactura, Procesado, Asunto, Remitente,Pdf,impuestoAcreditar,gastoAplicable, idAceptador) " +
+                                                        " VALUES (@EmailJson, 0, @Asunto, @Remitente, @Pdf,0,0,0); SELECT SCOPE_IDENTITY(); ",
                                                         new SqlParameter("@EmailJson", emailByteArray),
                                                         new SqlParameter("@Asunto", message.Subject),
                                                         new SqlParameter("@Remitente", message.From.ToString()),
@@ -140,7 +140,7 @@ namespace WAConectorAPI.Controllers
 
                                                    
                                                 }
-                                                catch { }
+                                                catch(Exception ex) { }
                                             }
 
                                             if (i == message.Attachments.Count())
