@@ -22,7 +22,7 @@ namespace WAConectorAPI.Controllers
         ModelCliente db = new ModelCliente();
         Metodos metodo = new Metodos();
 
-        public async System.Threading.Tasks.Task<HttpResponseMessage> GetAsync( [FromUri] string DocNum, string ObjType = "13" ,string CodSucursal = "001", bool ND = false)
+        public async System.Threading.Tasks.Task<HttpResponseMessage> GetAsync([FromUri] string DocNum, string ObjType = "13", string CodSucursal = "001", bool ND = false)
         {
             var t = db.Database.BeginTransaction();
             try
@@ -31,11 +31,11 @@ namespace WAConectorAPI.Controllers
 
                 var SQL = " ";
                 var consecInterno = 0;
-                switch(ObjType)
+                switch (ObjType)
                 {
                     case "13":
                         {
-                            if(!ND)
+                            if (!ND)
                             {
 
                                 SQL += parametros.FETEEnc + DocNum + " ";
@@ -44,7 +44,7 @@ namespace WAConectorAPI.Controllers
                             {
                                 SQL += parametros.FETEEnc + DocNum + "  and t0.Series=" + parametros.SerieND;
                             }
-                            
+
                             break;
                         }
                     case "14":
@@ -55,7 +55,7 @@ namespace WAConectorAPI.Controllers
                 }
 
                 var conexion = metodo.DevuelveCadena(CodSucursal);
-               
+
                 SqlConnection Cn = new SqlConnection(conexion);
                 SqlCommand Cmd = new SqlCommand(SQL, Cn);
                 SqlDataAdapter Da = new SqlDataAdapter(Cmd);
@@ -127,25 +127,25 @@ namespace WAConectorAPI.Controllers
                         {
                             tipoDocumento = "01";
                             consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecFac.Value;
-                            
+
                         }
                         else if (Serie == Convert.ToInt32(parametros.SerieTE))
                         {
                             tipoDocumento = "04";
                             consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecTiq.Value;
-                           
+
                         }
                         else if (Serie == Convert.ToInt32(parametros.SerieND))
                         {
                             tipoDocumento = "02";
                             consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecND.Value;
-                            
+
                         }
                         else if (Serie == Convert.ToInt32(parametros.SerieFEE))
                         {
                             tipoDocumento = "09";
                             consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecFEE;
-                            
+
                         }
                     }
                     else if (ObjType == "14")
@@ -154,14 +154,14 @@ namespace WAConectorAPI.Controllers
                         {
                             tipoDocumento = "03";
                             consecInterno = Convert.ToInt32(DocNum) - Sucursal.consecNC.Value;
-                             
+
                         }
                     }
                 }
-                    
 
 
-                if(string.IsNullOrEmpty(tipoDocumento))
+
+                if (string.IsNullOrEmpty(tipoDocumento))
                 {
                     throw new Exception("Este documento no es electronico");
                 }
@@ -260,7 +260,7 @@ namespace WAConectorAPI.Controllers
                     try
                     {
                         var tipoIdentificacion = Ds.Tables["Encabezado"].Rows[0]["TipoIdentificacion"].ToString();
-                        if(tipoIdentificacion == "EX")
+                        if (tipoIdentificacion == "EX")
                         {
                             enc.TipoIdentificacion = tipoIdentificacion;
 
@@ -269,19 +269,19 @@ namespace WAConectorAPI.Controllers
                     catch (Exception)
                     {
 
-                       
+
                     }
 
-                    if(metodo.ObtenerConfig("ValidarCedula") == "1")
+                    if (metodo.ObtenerConfig("ValidarCedula") == "1")
                     {
-                        if(string.IsNullOrEmpty(enc.TipoIdentificacion) && enc.TipoDocumento == "01") //Preguntamos si viene vacio la identificacion para hacerlo tiquete
+                        if (string.IsNullOrEmpty(enc.TipoIdentificacion) && enc.TipoDocumento == "01") //Preguntamos si viene vacio la identificacion para hacerlo tiquete
                         {
                             enc.TipoDocumento = "04";
                             db.Entry(Sucursal).State = System.Data.Entity.EntityState.Modified;
                             Sucursal.consecFac--;
                             enc.consecutivoInterno = Sucursal.consecTiq;
                             Sucursal.consecTiq++;
-                           db.SaveChanges();
+                            db.SaveChanges();
                         }
                     }
 
@@ -299,14 +299,14 @@ namespace WAConectorAPI.Controllers
                     enc.procesadaHacienda = false;
                     try
                     {
-                        enc.Comentarios = G.Base64Encode( Ds.Tables["Encabezado"].Rows[0]["PDFComentario"].ToString());
+                        enc.Comentarios = G.Base64Encode(Ds.Tables["Encabezado"].Rows[0]["PDFComentario"].ToString());
                     }
                     catch (Exception)
                     {
 
                         enc.Comentarios = "";
                     }
-                    
+
 
 
                     db.EncDocumento.Add(enc);
@@ -327,7 +327,7 @@ namespace WAConectorAPI.Controllers
                     catch (Exception)
                     {
 
-                        
+
                     }
 
                     try
@@ -399,10 +399,12 @@ namespace WAConectorAPI.Controllers
                     var i = 1;
                     foreach (DataRow item in Ds.Tables["Detalle"].Rows)
                     {
+                        var BanderaExento = false;
+
                         DetDocumento det = new DetDocumento();
                         det.idEncabezado = enc.id;
                         det.NumLinea = i;//Convert.ToInt32(item["NumLinea"]);
-                        if(enc.TipoDocumento == "09")
+                        if (enc.TipoDocumento == "09")
                         {
                             det.partidaArancelaria = item["PartidaArancelaria"].ToString();
                             var exp = item["idImpuesto"].ToString();
@@ -415,17 +417,17 @@ namespace WAConectorAPI.Controllers
                             det.exportacion = Convert.ToDecimal(item["Exportacion"]);
                             det.partidaArancelaria = det.exportacion == 0 ? "" : det.partidaArancelaria;
                         }
-                       
+
                         det.CodCabys = item["CodigoCabys"].ToString();
                         det.tipoCod = item["tipoCod"].ToString();
                         det.codPro = item["CodPro"].ToString();
-                        det.cantidad =  Convert.ToDecimal(item["Cantidad"]) == 0 ? 1: Convert.ToDecimal(item["Cantidad"]);
+                        det.cantidad = Convert.ToDecimal(item["Cantidad"]) == 0 ? 1 : Convert.ToDecimal(item["Cantidad"]);
                         det.unidadMedida = item["UnidadMedida"].ToString();
                         det.unidadMedida = db.UnidadesMedida.Where(a => a.codSAP == det.unidadMedida).FirstOrDefault().codCyber;
                         det.unidadMedidaComercial = item["UnidadMedida"].ToString();
                         det.unidadMedidaComercial = db.UnidadesMedida.Where(a => a.codSAP == det.unidadMedidaComercial).FirstOrDefault().Nombre;
                         det.NomPro = item["NomPro"].ToString();
-                        det.PrecioUnitario = Math.Round(Convert.ToDecimal(item["PrecioUnitario"]),2);
+                        det.PrecioUnitario = Math.Round(Convert.ToDecimal(item["PrecioUnitario"]), 2);
                         det.MontoTotal = Math.Round(det.cantidad * det.PrecioUnitario, 2);
                         var desc = Convert.ToDecimal(item["PorDesc"]) / 100;
                         det.MontoDescuento = det.MontoTotal * desc < 0 ? 0 : Math.Round(det.MontoTotal * desc, 2);
@@ -444,10 +446,26 @@ namespace WAConectorAPI.Controllers
                             det.PrecioUnitario = 0;
                             det.MontoDescuento = 0;
                             det.SubTotal = 0;
-                          //  det.baseImponible = det.SubTotal;
+                            //  det.baseImponible = det.SubTotal;
                             det.MontoTotal = 0;
                         }
 
+                        try
+                        {
+                            var Exe_Ley = item["EXE_LEY"].ToString();
+                            if (Exe_Ley == "Y")
+                            {
+                                BanderaExento = true;
+                            }
+
+                        }
+                        catch (Exception)
+                        {
+
+                            BanderaExento = false;
+                        }
+
+                        //Pregunta si viene un documento de exoneracion
                         if (!string.IsNullOrEmpty(item["DocumentoExoneracion"].ToString()))
                         {
                             if (Convert.ToInt32(item["DocumentoExoneracion"]) > 0)
@@ -469,7 +487,7 @@ namespace WAConectorAPI.Controllers
                                     var tipoImp = Ds2.Tables["Exoneracion"].Rows[0]["CodTarifa"].ToString();
                                     det.exonPorExo = Convert.ToInt32(Ds2.Tables["Exoneracion"].Rows[0]["Prcnt"].ToString().Substring(0, 2)); // Convert.ToInt32(db.Impuestos.Where(a => a.id == tipoImp).FirstOrDefault().tarifa.Value);
 
-                                    det.exonMonExo = Math.Round( ( det.SubTotal * det.exonPorExo / 100),2);
+                                    det.exonMonExo = Math.Round((det.SubTotal * det.exonPorExo / 100), 2);
 
                                     Cn2.Close();
                                     decimal total = 0;
@@ -529,7 +547,16 @@ namespace WAConectorAPI.Controllers
                                         }
                                         else
                                         {
-                                            totalmercexenta += det.MontoTotal;
+                                            //Agregar programacion de productos con exepcion
+                                            if (BanderaExento)
+                                            {
+                                                totalmercaderiagravada += det.MontoTotal;
+                                            }
+                                            else
+                                            {
+                                                totalmercexenta += det.MontoTotal;
+
+                                            }
                                         }
                                     }
 
@@ -605,7 +632,15 @@ namespace WAConectorAPI.Controllers
                                     }
                                     else
                                     {
-                                        totalmercexenta += det.MontoTotal;
+                                        if (BanderaExento)
+                                        {
+                                            totalmercaderiagravada += det.MontoTotal;
+                                        }
+                                        else
+                                        {
+                                            totalmercexenta += det.MontoTotal;
+                                        }
+
                                     }
                                 }
 
@@ -660,7 +695,7 @@ namespace WAConectorAPI.Controllers
                                         }
                                         else
                                         {
-                                            totalmercaderiasexoneradas += Convert.ToDecimal(det.MontoTotal * (det.exonPorExo/Impuesto.tarifa ));
+                                            totalmercaderiasexoneradas += Convert.ToDecimal(det.MontoTotal * (det.exonPorExo / Impuesto.tarifa));
                                             total = Convert.ToDecimal(det.MontoTotal * (det.exonPorExo / Impuesto.tarifa));
                                         }
 
@@ -673,14 +708,21 @@ namespace WAConectorAPI.Controllers
                                 }
                                 else
                                 {
-                                    totalmercexenta += det.MontoTotal;
+                                    if (BanderaExento)
+                                    {
+                                        totalmercaderiagravada += det.MontoTotal;
+                                    }
+                                    else
+                                    {
+                                        totalmercexenta += det.MontoTotal;
+                                    }
                                 }
                             }
 
                         }
 
 
-                     
+
                         det.impNeto = det.montoImpuesto - det.exonMonExo;
                         det.totalLinea = det.SubTotal + det.impNeto;
 
@@ -710,25 +752,25 @@ namespace WAConectorAPI.Controllers
                     enc.totalmercaderiaexonerado = Math.Round(totalmercaderiasexoneradas, 2);
 
 
-                    enc.totalgravado = Math.Round((enc.totalserviciogravado + enc.totalmercaderiagravado).Value,2);
-                    enc.totalexento = Math.Round ((enc.totalservicioexento + enc.totalmercaderiaexenta).Value , 2);
-                    enc.totalexonerado = Math.Round( (enc.totalservicioexonerado + enc.totalmercaderiaexonerado).Value ,2);
+                    enc.totalgravado = Math.Round((enc.totalserviciogravado + enc.totalmercaderiagravado).Value, 2);
+                    enc.totalexento = Math.Round((enc.totalservicioexento + enc.totalmercaderiaexenta).Value, 2);
+                    enc.totalexonerado = Math.Round((enc.totalservicioexonerado + enc.totalmercaderiaexonerado).Value, 2);
 
-                    enc.totalventa = Math.Round( (enc.totalgravado + enc.totalexento + enc.totalexonerado).Value ,2);
-                    enc.totaldescuentos = Math.Round( Detalles.Sum(a => a.MontoDescuento),2);
-                    enc.totalventaneta = Math.Round( (enc.totalventa - enc.totaldescuentos).Value ,2);
-                    enc.totalimpuestos = Math.Round( Detalles.Sum(a => a.impNeto),2);
+                    enc.totalventa = Math.Round((enc.totalgravado + enc.totalexento + enc.totalexonerado).Value, 2);
+                    enc.totaldescuentos = Math.Round(Detalles.Sum(a => a.MontoDescuento), 2);
+                    enc.totalventaneta = Math.Round((enc.totalventa - enc.totaldescuentos).Value, 2);
+                    enc.totalimpuestos = Math.Round(Detalles.Sum(a => a.impNeto), 2);
                     enc.totalivadevuelto = 0; //Servicios de salud no aplicables
                     enc.totalotroscargos = Math.Round(db.OtrosCargos.Where(a => a.idEncabezado == enc.id).FirstOrDefault() == null ? 0 : db.OtrosCargos.Where(a => a.idEncabezado == enc.id).Sum(d => d.monto), 2);
-                    enc.montoOtrosCargos = Math.Round(enc.totalotroscargos.Value,2);
-                    enc.totalcomprobante = Math.Round( (enc.totalventaneta + enc.totalimpuestos + enc.totalotroscargos - enc.totalivadevuelto ).Value,2);
+                    enc.montoOtrosCargos = Math.Round(enc.totalotroscargos.Value, 2);
+                    enc.totalcomprobante = Math.Round((enc.totalventaneta + enc.totalimpuestos + enc.totalotroscargos - enc.totalivadevuelto).Value, 2);
 
                     if (enc.TipoDocumento == "03") //Si es nota de credito
                     {
 
                         var Encabezado = db.EncDocumento.Where(a => a.consecutivoSAP == enc.RefNumeroDocumento && !string.IsNullOrEmpty(a.ClaveHacienda)).FirstOrDefault();
 
-                        if(Encabezado != null)
+                        if (Encabezado != null)
                         {
                             enc.RefTipoDocumento = Encabezado.TipoDocumento;
                             enc.RefFechaEmision = Encabezado.Fecha.Value;
@@ -777,7 +819,7 @@ namespace WAConectorAPI.Controllers
                         }
                         else
                         {
-                            if(enc.RefNumeroDocumento.Length < 20)
+                            if (enc.RefNumeroDocumento.Length < 20)
                             {
                                 enc.RefTipoDocumento = "99";
                                 enc.RefCodigo = "99";
@@ -829,9 +871,9 @@ namespace WAConectorAPI.Controllers
 
                                 CnR.Close();
                             }
-                            
+
                         }
-                        
+
 
                     }
 
@@ -841,8 +883,8 @@ namespace WAConectorAPI.Controllers
                     {
 
                         var Encabezado = db.EncDocumento.Where(a => a.consecutivoSAP == enc.RefNumeroDocumento && !string.IsNullOrEmpty(a.ClaveHacienda)).FirstOrDefault();
-                        
-                        if(Encabezado != null)
+
+                        if (Encabezado != null)
                         {
                             enc.RefTipoDocumento = Encabezado.TipoDocumento;
                             enc.RefFechaEmision = Encabezado.Fecha.Value;
@@ -942,11 +984,11 @@ namespace WAConectorAPI.Controllers
 
                                 CnR.Close();
                             }
-                            
+
                         }
-                            
-                         
-                       
+
+
+
 
                     }
 
@@ -980,7 +1022,7 @@ namespace WAConectorAPI.Controllers
                             response.Content.Headers.ContentType.MediaType = "application/json";
                             var resp = await response.Content.ReadAsAsync<respuesta>();
 
-                          
+
 
                             db.Entry(enc).State = System.Data.Entity.EntityState.Modified;
                             enc.procesadaHacienda = true;
@@ -995,13 +1037,13 @@ namespace WAConectorAPI.Controllers
                                 {
                                     enc.ConsecutivoHacienda = enc.ClaveHacienda.Substring(21, 20);
 
-                                  
+
 
                                 }
                             }
                             enc.ErrorCyber = resp.xml_error;
 
-                            if(enc.code == 1)
+                            if (enc.code == 1)
                             {
                                 //REspuesta de hacienda
                                 cuerpoRespuesta cuerpo = new cuerpoRespuesta();
@@ -1024,7 +1066,7 @@ namespace WAConectorAPI.Controllers
                                             enc.RespuestaHacienda = resp2.data.ind_estado;
                                             enc.XMLFirmado = resp2.data.respuesta_xml;
 
- 
+
 
 
                                         }
@@ -1032,7 +1074,7 @@ namespace WAConectorAPI.Controllers
                                         {
                                             enc.RespuestaHacienda = resp2.data.ind_estado;
 
-                                             
+
                                         }
                                     }
                                 }
@@ -1101,10 +1143,10 @@ namespace WAConectorAPI.Controllers
                                 }
                         }
                     }
-                       
+
                     //Se vuelve a enviar en el caso de que haya existido un error
                     t.Commit();
-                    if( Factura.code != 1)
+                    if (Factura.code != 1)
                     {
                         var DetFactura = db.DetDocumento.Where(a => a.idEncabezado == Factura.id).ToList();
 
@@ -1134,11 +1176,11 @@ namespace WAConectorAPI.Controllers
                                     {
                                         Factura.ConsecutivoHacienda = Factura.ClaveHacienda.Substring(21, 20);
 
-                                     
+
 
                                     }
 
-                                    
+
                                 }
                                 Factura.ErrorCyber = resp.xml_error;
 
@@ -1165,12 +1207,12 @@ namespace WAConectorAPI.Controllers
                                                 Factura.RespuestaHacienda = resp2.data.ind_estado;
                                                 Factura.XMLFirmado = resp2.data.respuesta_xml;
 
-                                               
+
                                             }
                                             else
                                             {
                                                 Factura.RespuestaHacienda = resp2.data.ind_estado;
-                                               
+
                                             }
                                         }
                                     }
@@ -1202,13 +1244,13 @@ namespace WAConectorAPI.Controllers
                         }
                     }
 
-                    
+
 
 
 
                 }
 
-              
+
 
 
                 return Request.CreateResponse(HttpStatusCode.OK);
@@ -1232,7 +1274,7 @@ namespace WAConectorAPI.Controllers
                 be.Fecha = DateTime.Now;
                 db.BitacoraErrores.Add(be);
                 db.SaveChanges();
-                
+
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
 
             }
@@ -1264,7 +1306,7 @@ namespace WAConectorAPI.Controllers
                         response2.Content.Headers.ContentType.MediaType = "application/json";
                         var resp2 = await response2.Content.ReadAsAsync<respuestaHacienda>();
 
-                        return Request.CreateResponse(HttpStatusCode.OK,resp2);
+                        return Request.CreateResponse(HttpStatusCode.OK, resp2);
                     }
                     else
                     {
@@ -1279,9 +1321,9 @@ namespace WAConectorAPI.Controllers
 
                 //
 
-                 
+
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
 
@@ -1294,14 +1336,14 @@ namespace WAConectorAPI.Controllers
             var error = "";
             try
             {
-                var Documentos1 = db.EncDocumento.Where(a =>   a.sincronizadaSAP == false).ToList();
+                var Documentos1 = db.EncDocumento.Where(a => a.sincronizadaSAP == false).ToList();
                 var Documentos2 = db.EncDocumento.Where(a => a.procesadaHacienda == false && a.code == 0).ToList();
 
 
                 var parametros = db.Parametros.FirstOrDefault();
                 Metodos metodo = new Metodos();
 
-                foreach(var item in Documentos2)
+                foreach (var item in Documentos2)
                 {
                     try
                     {
@@ -1388,7 +1430,8 @@ namespace WAConectorAPI.Controllers
                                     db.SaveChanges();
                                     //product = await response.Content.ReadAsAsync<ListaOrdenes>();
 
-                                }else
+                                }
+                                else
                                 {
                                     BitacoraErrores be = new BitacoraErrores();
                                     be.DocNum = item.DocEntry;
@@ -1429,9 +1472,9 @@ namespace WAConectorAPI.Controllers
                 }
 
                 //Poner el consecutivo en SAP
-                foreach(var item in Documentos1)
+                foreach (var item in Documentos1)
                 {
-                    if(!string.IsNullOrEmpty(item.ClaveHacienda))
+                    if (!string.IsNullOrEmpty(item.ClaveHacienda))
                     {
                         if (item.ClaveHacienda.Length > 3)
                         {
@@ -1491,7 +1534,7 @@ namespace WAConectorAPI.Controllers
                                     else if (item.TipoDocumento == "08")
                                     {
                                         Cmd4.CommandText = " EXEC ('call \"" + metodo.ObtenerConfig("TablaIntermedia") + "\".ACTUALIZARCOMPRA(" + item.DocEntry + ", ''P'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
- 
+
                                     }
 
 
@@ -1499,7 +1542,7 @@ namespace WAConectorAPI.Controllers
                                     Cn4.Close();
                                     Cn4.Dispose();
                                 }
-                                   
+
 
                                 db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                                 item.RespuestaHacienda = "procesando";
@@ -1511,7 +1554,7 @@ namespace WAConectorAPI.Controllers
                                 BitacoraErrores be = new BitacoraErrores();
                                 be.DocNum = item.consecutivoSAP;
                                 be.Type = item.TipoDocumento;
-                                be.Descripcion = ex.Message + " " + error ;
+                                be.Descripcion = ex.Message + " " + error;
                                 be.StackTrace = ex.StackTrace;
                                 be.Fecha = DateTime.Now;
                                 db.BitacoraErrores.Add(be);
@@ -1523,13 +1566,13 @@ namespace WAConectorAPI.Controllers
 
                         }
                     }
-                    
+
                 }
 
 
                 var Documentos = db.EncDocumento.Where(a => a.RespuestaHacienda.ToLower().Contains("procesando") && !a.XMLFirmado.ToLower().Contains("Error".ToLower())).ToList();
 
-                if(parametros.urlCyberRespHacienda.ToLower().Contains("consultarespuestahacienda") )
+                if (parametros.urlCyberRespHacienda.ToLower().Contains("consultarespuestahacienda"))
                 {
                     //Verificar Estado de hacienda
                     foreach (var item in Documentos)
@@ -1897,7 +1940,7 @@ namespace WAConectorAPI.Controllers
                         //
                     }
                 }
-                
+
 
 
 
@@ -1930,15 +1973,15 @@ namespace WAConectorAPI.Controllers
 
                 var item = db.EncDocumento.Where(a => a.ClaveHacienda == datos.clave).FirstOrDefault();
                 var parametros = db.Parametros.FirstOrDefault();
-                if(item != null)
+                if (item != null)
                 {
                     db.Entry(item).State = System.Data.Entity.EntityState.Modified;
                     item.RespuestaHacienda = datos.ind_estado;
 
-                    if(datos.ind_estado.Contains("aceptado"))
+                    if (datos.ind_estado.Contains("aceptado"))
                     {
 
-                        if(metodo.ObtenerConfig("HANA") == "0")
+                        if (metodo.ObtenerConfig("HANA") == "0")
                         {
                             var Cn5 = new SqlConnection(metodo.DevuelveCadena(item.idSucursal));
                             var Cmd5 = new SqlCommand();
@@ -1977,8 +2020,8 @@ namespace WAConectorAPI.Controllers
                             if (item.TipoDocumento != "08" && item.TipoDocumento != "03")
                             {
 
-                                Cmd4.CommandText = " EXEC ('call \""+ metodo.ObtenerConfig("TablaIntermedia") + "\".ACTUALIZARFACTURA(" + item.DocEntry + ", ''A'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
-                         
+                                Cmd4.CommandText = " EXEC ('call \"" + metodo.ObtenerConfig("TablaIntermedia") + "\".ACTUALIZARFACTURA(" + item.DocEntry + ", ''A'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
+
                             }
                             else if (item.TipoDocumento == "03")
                             {
@@ -1996,7 +2039,7 @@ namespace WAConectorAPI.Controllers
                             Cn4.Close();
                             Cn4.Dispose();
                         }
-                       
+
                         item.sincronizadaSAP = true;
                     }
                     else
@@ -2041,7 +2084,7 @@ namespace WAConectorAPI.Controllers
                             {
 
                                 Cmd4.CommandText = " EXEC ('call \"" + metodo.ObtenerConfig("TablaIntermedia") + "\".ACTUALIZARFACTURA(" + item.DocEntry + ", ''R'', " + item.ConsecutivoHacienda + ", " + item.ClaveHacienda + " )') AT SAPHANA";
-                                 
+
                             }
                             else if (item.TipoDocumento == "03")
                             {
@@ -2059,7 +2102,7 @@ namespace WAConectorAPI.Controllers
                             Cn4.Close();
                             Cn4.Dispose();
                         }
-                         
+
                         item.sincronizadaSAP = true;
                     }
 
@@ -2071,7 +2114,7 @@ namespace WAConectorAPI.Controllers
                     string Clave = ClaveRespuesta[0];
                     var bandeja = db.BandejaEntrada.Where(a => a.ClaveReceptor == Clave).FirstOrDefault();
 
-                    if(bandeja != null)
+                    if (bandeja != null)
                     {
                         db.Entry(bandeja).State = System.Data.Entity.EntityState.Modified;
                         bandeja.XMLRespuesta = datos.respuesta_xml;
@@ -2084,7 +2127,7 @@ namespace WAConectorAPI.Controllers
                         BitacoraErrores be = new BitacoraErrores();
                         be.DocNum = "";
                         be.Type = "";
-                        be.Descripcion = "No se encontro " + JsonConvert.SerializeObject(datos) ;
+                        be.Descripcion = "No se encontro " + JsonConvert.SerializeObject(datos);
                         be.StackTrace = "Respuesta";
                         be.Fecha = DateTime.Now;
                         db.BitacoraErrores.Add(be);
@@ -2092,8 +2135,8 @@ namespace WAConectorAPI.Controllers
                     }
                 }
 
-           
-                
+
+
 
                 return Request.CreateResponse(HttpStatusCode.OK);
             }
@@ -2114,12 +2157,12 @@ namespace WAConectorAPI.Controllers
         }
 
 
-       
+
 
     }
 
 
 
 
-    
+
 }
