@@ -39,7 +39,7 @@ namespace WAConectorAPI.Controllers
                 G G = new G();
                 ModelCliente db = new ModelCliente();
 
-                var Bandeja = db.BandejaEntrada.Where(a => a.FechaIngreso >= FechaInicial && a.FechaIngreso <= FechaFinal).ToList();
+                var Bandeja = db.BandejaEntrada.Where(a => a.FechaIngreso >= FechaInicial && a.FechaIngreso <= FechaFinal && a.XmlConfirmacion == null).ToList();
 
                 foreach(var item in Bandeja)
                 {
