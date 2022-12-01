@@ -1253,7 +1253,7 @@ namespace WAConectorAPI.Controllers
 
 
 
-                return Request.CreateResponse(HttpStatusCode.OK);
+                return Request.CreateResponse(HttpStatusCode.OK, enc);
             }
             catch (Exception ex)
             {
@@ -1304,9 +1304,48 @@ namespace WAConectorAPI.Controllers
                     if (response2.IsSuccessStatusCode)
                     {
                         response2.Content.Headers.ContentType.MediaType = "application/json";
-                        var resp2 = await response2.Content.ReadAsAsync<respuestaHacienda>();
 
-                        return Request.CreateResponse(HttpStatusCode.OK, resp2);
+                        if (parametros.urlCyberRespHacienda.ToLower().Contains("consultarespuestahacienda"))
+                        {
+                            var resp2 = await response2.Content.ReadAsAsync<respuestaHacienda>();
+                            if (resp2.data.ind_estado.Contains("aceptado"))
+                            {
+                                var Documentos = db.EncDocumento.Where(a => a.ClaveHacienda == Clave).FirstOrDefault();
+
+                                if (Documentos != null)
+                                {
+                                    db.Entry(Documentos).State = System.Data.Entity.EntityState.Modified;
+                                    Documentos.RespuestaHacienda = resp2.data.ind_estado;
+                                    Documentos.XMLFirmado = resp2.data.respuesta_xml;
+                                    db.SaveChanges();
+                                }
+                            }
+
+                            return Request.CreateResponse(HttpStatusCode.OK, resp2);
+                        }
+                        else
+                        {
+                            var resp2 = await response2.Content.ReadAsAsync<HaciendaRespuestaOtrolink>();
+                            if (resp2.hacienda_result.ind_estado.Contains("aceptado"))
+                            {
+                                var Documentos = db.EncDocumento.Where(a => a.ClaveHacienda == Clave).FirstOrDefault();
+
+                                if (Documentos != null)
+                                {
+                                    db.Entry(Documentos).State = System.Data.Entity.EntityState.Modified;
+                                    Documentos.RespuestaHacienda = resp2.hacienda_result.ind_estado;
+                                    Documentos.XMLFirmado = resp2.hacienda_result.respuesta_xml;
+                                    db.SaveChanges();
+                                }
+                            }
+
+                            return Request.CreateResponse(HttpStatusCode.OK, resp2);
+                        }
+
+
+
+
+
                     }
                     else
                     {
