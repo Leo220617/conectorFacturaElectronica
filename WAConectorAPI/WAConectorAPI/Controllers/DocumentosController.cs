@@ -1593,7 +1593,7 @@ namespace WAConectorAPI.Controllers
                                 BitacoraErrores be = new BitacoraErrores();
                                 be.DocNum = item.consecutivoSAP;
                                 be.Type = item.TipoDocumento;
-                                be.Descripcion = ex.Message + " " + error;
+                                be.Descripcion = ex.Message;
                                 be.StackTrace = ex.StackTrace;
                                 be.Fecha = DateTime.Now;
                                 db.BitacoraErrores.Add(be);
