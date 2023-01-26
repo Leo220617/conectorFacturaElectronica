@@ -409,7 +409,7 @@ namespace WAConectorAPI.Controllers
                             det.partidaArancelaria = item["PartidaArancelaria"].ToString();
                             var exp = item["idImpuesto"].ToString();
                             var ImpuestoE = db.Impuestos.Where(a => a.id == exp).FirstOrDefault();
-                            det.exportacion = Math.Round(Convert.ToDecimal(det.SubTotal * (ImpuestoE.tarifa / 100)), 2);
+                            det.exportacion = Math.Round(Convert.ToDecimal(det.SubTotal * (ImpuestoE.tarifa / 100)), 3);
                         }
                         else
                         {
@@ -427,17 +427,17 @@ namespace WAConectorAPI.Controllers
                         det.unidadMedidaComercial = item["UnidadMedida"].ToString();
                         det.unidadMedidaComercial = db.UnidadesMedida.Where(a => a.codSAP == det.unidadMedidaComercial).FirstOrDefault().Nombre;
                         det.NomPro = item["NomPro"].ToString();
-                        det.PrecioUnitario = Math.Round(Convert.ToDecimal(item["PrecioUnitario"]), 2);
-                        det.MontoTotal = Math.Round(det.cantidad * det.PrecioUnitario, 2);
+                        det.PrecioUnitario = Math.Round(Convert.ToDecimal(item["PrecioUnitario"]), 3);
+                        det.MontoTotal = Math.Round(det.cantidad * det.PrecioUnitario, 3);
                         var desc = Convert.ToDecimal(item["PorDesc"]) / 100;
-                        det.MontoDescuento = det.MontoTotal * desc < 0 ? 0 : Math.Round(det.MontoTotal * desc, 2);
+                        det.MontoDescuento = det.MontoTotal * desc < 0 ? 0 : Math.Round(det.MontoTotal * desc, 3);
                         det.NaturalezaDescuento = string.IsNullOrEmpty(item["NaturalezaDescuento"].ToString()) ? "Descuento" : item["NaturalezaDescuento"].ToString();
-                        det.SubTotal = Math.Round(det.MontoTotal - det.MontoDescuento, 2);
+                        det.SubTotal = Math.Round(det.MontoTotal - det.MontoDescuento, 3);
                         det.idImpuesto = item["idImpuesto"].ToString();
                         det.factorIVA = Convert.ToDecimal(item["FactorIVA"]);
-                        det.baseImponible = Math.Round(det.SubTotal, 2);
+                        det.baseImponible = Math.Round(det.SubTotal, 3);
                         var Impuesto = db.Impuestos.Where(a => a.id == det.idImpuesto).FirstOrDefault();
-                        det.montoImpuesto = Math.Round(Convert.ToDecimal(det.SubTotal * (Impuesto.tarifa / 100)), 2);
+                        det.montoImpuesto = Math.Round(Convert.ToDecimal(det.SubTotal * (Impuesto.tarifa / 100)), 3);
 
                         var TaxOnly = item["TaxOnly"].ToString();
 
@@ -485,9 +485,9 @@ namespace WAConectorAPI.Controllers
                                     det.exonNomInst = Ds2.Tables["Exoneracion"].Rows[0]["Emisora"].ToString();
                                     det.exonFecEmi = Convert.ToDateTime(Ds2.Tables["Exoneracion"].Rows[0]["FechaEmision"]);
                                     var tipoImp = Ds2.Tables["Exoneracion"].Rows[0]["CodTarifa"].ToString();
-                                    det.exonPorExo = Convert.ToInt32(Ds2.Tables["Exoneracion"].Rows[0]["Prcnt"].ToString().Substring(0, 2)); // Convert.ToInt32(db.Impuestos.Where(a => a.id == tipoImp).FirstOrDefault().tarifa.Value);
+                                    det.exonPorExo = Convert.ToInt32(Ds2.Tables["Exoneracion"].Rows[0]["Prcnt"].ToString().Substring(0, 3)); // Convert.ToInt32(db.Impuestos.Where(a => a.id == tipoImp).FirstOrDefault().tarifa.Value);
 
-                                    det.exonMonExo = Math.Round((det.SubTotal * det.exonPorExo / 100), 2);
+                                    det.exonMonExo = Math.Round((det.SubTotal * det.exonPorExo / 100), 3);
 
                                     Cn2.Close();
                                     decimal total = 0;
@@ -733,37 +733,37 @@ namespace WAConectorAPI.Controllers
                     }
 
                     db.Entry(enc).State = System.Data.Entity.EntityState.Modified;
-                    // enc.totalserviciogravado = Math.Round(Detalles.Where(a => a.unidadMedida.ToLower() == "sp" && a.exonTipoDoc == null).Sum(d => d.MontoTotal), 2);
-                    //enc.totalservicioexento = Math.Round(Detalles.Where(a => a.unidadMedida.ToLower() == "sp" && a.exonTipoDoc != null).Sum(d => d.MontoTotal), 2);
-                    //enc.totalservicioexonerado = Math.Round(totalserviciosexonerado, 2);
+                    // enc.totalserviciogravado = Math.Round(Detalles.Where(a => a.unidadMedida.ToLower() == "sp" && a.exonTipoDoc == null).Sum(d => d.MontoTotal), 3);
+                    //enc.totalservicioexento = Math.Round(Detalles.Where(a => a.unidadMedida.ToLower() == "sp" && a.exonTipoDoc != null).Sum(d => d.MontoTotal), 3);
+                    //enc.totalservicioexonerado = Math.Round(totalserviciosexonerado, 3);
 
-                    enc.totalserviciogravado = Math.Round(totalsergravados, 2);
-                    enc.totalservicioexento = Math.Round(totalservexentos, 2);
-                    enc.totalservicioexonerado = Math.Round(totalserviciosexonerado, 2);
-
-
-
-                    // enc.totalmercaderiagravado = Math.Round(Detalles.Where(a => a.unidadMedida.ToLower() != "sp" && a.exonTipoDoc == null).Sum(d => d.MontoTotal), 2);
-                    //enc.totalmercaderiaexenta = Math.Round(Detalles.Where(a => a.unidadMedida.ToLower() != "sp" && a.exonTipoDoc != null).Sum(d => d.MontoTotal), 2);
-                    //enc.totalmercaderiaexonerado = Math.Round(totalmercaderiasexoneradas, 2);
-
-                    enc.totalmercaderiagravado = Math.Round(totalmercaderiagravada, 2);
-                    enc.totalmercaderiaexenta = Math.Round(totalmercexenta, 2);
-                    enc.totalmercaderiaexonerado = Math.Round(totalmercaderiasexoneradas, 2);
+                    enc.totalserviciogravado = Math.Round(totalsergravados, 3);
+                    enc.totalservicioexento = Math.Round(totalservexentos, 3);
+                    enc.totalservicioexonerado = Math.Round(totalserviciosexonerado, 3);
 
 
-                    enc.totalgravado = Math.Round((enc.totalserviciogravado + enc.totalmercaderiagravado).Value, 2);
-                    enc.totalexento = Math.Round((enc.totalservicioexento + enc.totalmercaderiaexenta).Value, 2);
-                    enc.totalexonerado = Math.Round((enc.totalservicioexonerado + enc.totalmercaderiaexonerado).Value, 2);
 
-                    enc.totalventa = Math.Round((enc.totalgravado + enc.totalexento + enc.totalexonerado).Value, 2);
-                    enc.totaldescuentos = Math.Round(Detalles.Sum(a => a.MontoDescuento), 2);
-                    enc.totalventaneta = Math.Round((enc.totalventa - enc.totaldescuentos).Value, 2);
-                    enc.totalimpuestos = Math.Round(Detalles.Sum(a => a.impNeto), 2);
+                    // enc.totalmercaderiagravado = Math.Round(Detalles.Where(a => a.unidadMedida.ToLower() != "sp" && a.exonTipoDoc == null).Sum(d => d.MontoTotal), 3);
+                    //enc.totalmercaderiaexenta = Math.Round(Detalles.Where(a => a.unidadMedida.ToLower() != "sp" && a.exonTipoDoc != null).Sum(d => d.MontoTotal), 3);
+                    //enc.totalmercaderiaexonerado = Math.Round(totalmercaderiasexoneradas, 3);
+
+                    enc.totalmercaderiagravado = Math.Round(totalmercaderiagravada, 3);
+                    enc.totalmercaderiaexenta = Math.Round(totalmercexenta, 3);
+                    enc.totalmercaderiaexonerado = Math.Round(totalmercaderiasexoneradas, 3);
+
+
+                    enc.totalgravado = Math.Round((enc.totalserviciogravado + enc.totalmercaderiagravado).Value, 3);
+                    enc.totalexento = Math.Round((enc.totalservicioexento + enc.totalmercaderiaexenta).Value, 3);
+                    enc.totalexonerado = Math.Round((enc.totalservicioexonerado + enc.totalmercaderiaexonerado).Value, 3);
+
+                    enc.totalventa = Math.Round((enc.totalgravado + enc.totalexento + enc.totalexonerado).Value, 3);
+                    enc.totaldescuentos = Math.Round(Detalles.Sum(a => a.MontoDescuento), 3);
+                    enc.totalventaneta = Math.Round((enc.totalventa - enc.totaldescuentos).Value, 3);
+                    enc.totalimpuestos = Math.Round(Detalles.Sum(a => a.impNeto), 3);
                     enc.totalivadevuelto = 0; //Servicios de salud no aplicables
-                    enc.totalotroscargos = Math.Round(db.OtrosCargos.Where(a => a.idEncabezado == enc.id).FirstOrDefault() == null ? 0 : db.OtrosCargos.Where(a => a.idEncabezado == enc.id).Sum(d => d.monto), 2);
-                    enc.montoOtrosCargos = Math.Round(enc.totalotroscargos.Value, 2);
-                    enc.totalcomprobante = Math.Round((enc.totalventaneta + enc.totalimpuestos + enc.totalotroscargos - enc.totalivadevuelto).Value, 2);
+                    enc.totalotroscargos = Math.Round(db.OtrosCargos.Where(a => a.idEncabezado == enc.id).FirstOrDefault() == null ? 0 : db.OtrosCargos.Where(a => a.idEncabezado == enc.id).Sum(d => d.monto), 3);
+                    enc.montoOtrosCargos = Math.Round(enc.totalotroscargos.Value, 3);
+                    enc.totalcomprobante = Math.Round((enc.totalventaneta + enc.totalimpuestos + enc.totalotroscargos - enc.totalivadevuelto).Value, 3);
 
                     if (enc.TipoDocumento == "03") //Si es nota de credito
                     {

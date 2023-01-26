@@ -310,11 +310,11 @@ namespace WAConectorAPI.Controllers
 
 
 
-                    de.cantidad = Math.Round(item.cantidad, 2).ToString().Replace(",", ".");
+                    de.cantidad = Math.Round(item.cantidad, 3).ToString().Replace(",", ".");
                     de.unidad_medida = item.unidadMedida;
                     de.unidad_medida_comercial = item.unidadMedidaComercial;
                     de.detalle = item.NomPro;
-                    de.precio_unitario = Math.Round(item.PrecioUnitario, 2).ToString().Replace(",", ".");
+                    de.precio_unitario = Math.Round(item.PrecioUnitario, 3).ToString().Replace(",", ".");
                     de.monto_total = item.MontoTotal.ToString().Replace(",", ".");
                     de.descuento = new descuento[1];
                     descuento desc = new descuento();
@@ -390,7 +390,7 @@ namespace WAConectorAPI.Controllers
 
                 xml.resumen = new resumen();
                 xml.resumen.moneda = enc.moneda == "COL" ? "CRC" : enc.moneda;
-                xml.resumen.tipo_cambio = Math.Round(enc.tipoCambio.Value, 2).ToString().Replace(",", ".");
+                xml.resumen.tipo_cambio = Math.Round(enc.tipoCambio.Value, 3).ToString().Replace(",", ".");
                 xml.resumen.totalserviciogravado = enc.totalserviciogravado == 0 ? null : enc.totalserviciogravado.ToString().Replace(",", ".");
                 xml.resumen.totalservicioexento = enc.totalservicioexento == 0 ? null : enc.totalservicioexento.ToString().Replace(",", ".");
                 xml.resumen.totalservicioexonerado = enc.totalservicioexonerado == 0 ? null : enc.totalservicioexonerado.ToString().Replace(",", ".");
