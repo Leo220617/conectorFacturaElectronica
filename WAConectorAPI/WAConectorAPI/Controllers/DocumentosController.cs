@@ -485,7 +485,7 @@ namespace WAConectorAPI.Controllers
                                     det.exonNomInst = Ds2.Tables["Exoneracion"].Rows[0]["Emisora"].ToString();
                                     det.exonFecEmi = Convert.ToDateTime(Ds2.Tables["Exoneracion"].Rows[0]["FechaEmision"]);
                                     var tipoImp = Ds2.Tables["Exoneracion"].Rows[0]["CodTarifa"].ToString();
-                                    det.exonPorExo = Convert.ToInt32(Ds2.Tables["Exoneracion"].Rows[0]["Prcnt"].ToString().Substring(0, 3)); // Convert.ToInt32(db.Impuestos.Where(a => a.id == tipoImp).FirstOrDefault().tarifa.Value);
+                                    det.exonPorExo = Convert.ToInt32(Ds2.Tables["Exoneracion"].Rows[0]["Prcnt"].ToString().Substring(0, 2)); // Convert.ToInt32(db.Impuestos.Where(a => a.id == tipoImp).FirstOrDefault().tarifa.Value);
 
                                     det.exonMonExo = Math.Round((det.SubTotal * det.exonPorExo / 100), 3);
 
