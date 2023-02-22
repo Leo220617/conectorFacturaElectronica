@@ -38,7 +38,7 @@ namespace WAConectorAPI.Controllers
                 G G = new G();
                 var Parametros = db.Parametros.FirstOrDefault();
                 var Correos = db.CorreosRecepcion.ToList();
-                if (metodo.ObtenerConfig("365") == "0")
+                if (!Parametros.es365)
                 {
                     foreach (var item in Correos)
                     {
@@ -216,165 +216,169 @@ namespace WAConectorAPI.Controllers
                 }
                 else
                 {
-                    var credentials = new ClientSecretCredential(
-                metodo.ObtenerConfig("tenant"),
-                metodo.ObtenerConfig("clienteID"),
-                metodo.ObtenerConfig("SecretoID"),
+                    foreach(var item in Correos)
+                    {
+                        var credentials = new ClientSecretCredential(
+                item.Tenant,
+                item.RecepcionPassword, //clientId
+                item.RecepcionHostName, //Secret
                 new TokenCredentialOptions { AuthorityHost = AzureAuthorityHosts.AzurePublicCloud });
 
-                    // Define a new Microsoft Graph service client.            
-                    GraphServiceClient _graphServiceClient = new GraphServiceClient(credentials);
+                        // Define a new Microsoft Graph service client.            
+                        GraphServiceClient _graphServiceClient = new GraphServiceClient(credentials);
 
-                    // Get the e-mails for a specific user.
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                    var messages = await _graphServiceClient.Users[metodo.ObtenerConfig("email365")].Messages.Request().GetAsync();
-                    foreach (var message in messages)
-                    {
-                        var menssage = await _graphServiceClient.Users[metodo.ObtenerConfig("email365")].Messages[message.Id].Request().Expand("attachments").GetAsync();
-
-                        if (menssage.Attachments.Count > 0)
+                        // Get the e-mails for a specific user.
+                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                        var messages = await _graphServiceClient.Users[item.RecepcionEmail].Messages.Request().Filter("isRead eq false").GetAsync();
+                        foreach (var message in messages)
                         {
-                            try
+                            var menssage = await _graphServiceClient.Users[item.RecepcionEmail].Messages[message.Id].Request().Expand("attachments").GetAsync();
+
+                            if (menssage.Attachments.Count > 0)
                             {
-                                byte[] ByteArrayPDF = null;
-                                int i = 1;
-
-                                decimal idGeneral = 0;
-                                foreach (var attachment in menssage.Attachments.CurrentPage)
+                                try
                                 {
+                                    byte[] ByteArrayPDF = null;
+                                    int i = 1;
 
-                                    try
+                                    decimal idGeneral = 0;
+                                    foreach (var attachment in menssage.Attachments.CurrentPage)
                                     {
-                                        var att = await _graphServiceClient.Users[metodo.ObtenerConfig("email365")].Messages[menssage.Id].Attachments[attachment.Id].Request().GetAsync();
-                                        var base64 = Convert.ToBase64String(((Microsoft.Graph.FileAttachment)att).ContentBytes);
-                                        var base64EncodedBytes = System.Convert.FromBase64String(base64);
-                                        var texto = System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
 
-                                        if (texto.Substring(0, 3) == "???")
-                                            texto = texto.Substring(3);
-
-                                        if (texto.Contains("PDF"))
+                                        try
                                         {
+                                            var att = await _graphServiceClient.Users[item.RecepcionEmail].Messages[menssage.Id].Attachments[attachment.Id].Request().GetAsync();
+                                            var base64 = Convert.ToBase64String(((Microsoft.Graph.FileAttachment)att).ContentBytes);
+                                            var base64EncodedBytes = System.Convert.FromBase64String(base64);
+                                            var texto = System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
 
-                                            ByteArrayPDF = ((Microsoft.Graph.FileAttachment)att).ContentBytes;
-                                            //ByteArrayPDF = G.Zip(texto);
+                                            if (texto.Substring(0, 3) == "???")
+                                                texto = texto.Substring(3);
 
-
-                                        }
-
-
-                                        if (texto.Contains("FacturaElectronica")
-                                                || texto.Contains("NotaCreditoElectronica")
-                                                && !texto.Contains("TiqueteElectronico")
-
-                                                //  && !texto.Contains("NotaCreditoElectronica")
-                                                && !texto.Contains("NotaDebitoElectronica"))
-                                        {
-                                            var emailByteArray = G.Zip(texto);
-
-                                            decimal id = db.Database.SqlQuery<decimal>("Insert Into BandejaEntrada(XmlFactura, Procesado, Asunto, Remitente,Pdf,impuestoAcreditar,gastoAplicable, idAceptador) " +
-                                                    " VALUES (@EmailJson, 0, @Asunto, @Remitente, @Pdf,0,0,0); SELECT SCOPE_IDENTITY(); ",
-                                                    new SqlParameter("@EmailJson", emailByteArray),
-                                                    new SqlParameter("@Asunto", message.Subject),
-                                                    new SqlParameter("@Remitente", message.From.EmailAddress.Address.ToString()),
-                                                    new SqlParameter("@Pdf", (ByteArrayPDF == null ? new byte[0] : ByteArrayPDF))).First();
-                                            idGeneral = id;
-                                            try
+                                            if (texto.Contains("PDF"))
                                             {
 
-                                                var datos = G.ObtenerDatosXmlRechazado(texto);
-                                                datos.NumeroConsecutivo = datos.NumeroConsecutivo.TrimEnd();
-                                                datos.Numero = datos.Numero.TrimEnd();
-                                                var Detalle = db.BandejaEntrada.Where(a => a.NumeroConsecutivo == datos.NumeroConsecutivo && a.IdEmisor == datos.Numero).FirstOrDefault();
-                                                if (datos.IdReceptor == db.Sucursales.FirstOrDefault().Cedula && Detalle == null && !string.IsNullOrEmpty(datos.NumeroConsecutivo))
+                                                ByteArrayPDF = ((Microsoft.Graph.FileAttachment)att).ContentBytes;
+                                                //ByteArrayPDF = G.Zip(texto);
+
+
+                                            }
+
+
+                                            if (texto.Contains("FacturaElectronica")
+                                                    || texto.Contains("NotaCreditoElectronica")
+                                                    && !texto.Contains("TiqueteElectronico")
+
+                                                    //  && !texto.Contains("NotaCreditoElectronica")
+                                                    && !texto.Contains("NotaDebitoElectronica"))
+                                            {
+                                                var emailByteArray = G.Zip(texto);
+
+                                                decimal id = db.Database.SqlQuery<decimal>("Insert Into BandejaEntrada(XmlFactura, Procesado, Asunto, Remitente,Pdf,impuestoAcreditar,gastoAplicable, idAceptador) " +
+                                                        " VALUES (@EmailJson, 0, @Asunto, @Remitente, @Pdf,0,0,0); SELECT SCOPE_IDENTITY(); ",
+                                                        new SqlParameter("@EmailJson", emailByteArray),
+                                                        new SqlParameter("@Asunto", message.Subject),
+                                                        new SqlParameter("@Remitente", message.From.EmailAddress.Address.ToString()),
+                                                        new SqlParameter("@Pdf", (ByteArrayPDF == null ? new byte[0] : ByteArrayPDF))).First();
+                                                idGeneral = id;
+                                                try
                                                 {
-                                                    db.Database.ExecuteSqlCommand("Update BandejaEntrada set NumeroConsecutivo=@NumeroConsecutivo, " +
-                                                   " TipoDocumento = @TipoDocumento, FechaEmision = @FechaEmision , " +
-                                                   " NombreEmisor = @NombreEmisor,IdEmisor = @IdEmisor ,CodigoMoneda = @CodigoMoneda , " +
-                                                   " TotalComprobante = @TotalComprobante, " +
-                                                   " Impuesto = @TotalImpuesto, " +
-                                                   " tipoIdentificacionEmisor = @EmisorId" +
+
+                                                    var datos = G.ObtenerDatosXmlRechazado(texto);
+                                                    datos.NumeroConsecutivo = datos.NumeroConsecutivo.TrimEnd();
+                                                    datos.Numero = datos.Numero.TrimEnd();
+                                                    var Detalle = db.BandejaEntrada.Where(a => a.NumeroConsecutivo == datos.NumeroConsecutivo && a.IdEmisor == datos.Numero).FirstOrDefault();
+                                                    if (datos.IdReceptor == db.Sucursales.FirstOrDefault().Cedula && Detalle == null && !string.IsNullOrEmpty(datos.NumeroConsecutivo))
+                                                    {
+                                                        db.Database.ExecuteSqlCommand("Update BandejaEntrada set NumeroConsecutivo=@NumeroConsecutivo, " +
+                                                       " TipoDocumento = @TipoDocumento, FechaEmision = @FechaEmision , " +
+                                                       " NombreEmisor = @NombreEmisor,IdEmisor = @IdEmisor ,CodigoMoneda = @CodigoMoneda , " +
+                                                       " TotalComprobante = @TotalComprobante, " +
+                                                       " Impuesto = @TotalImpuesto, " +
+                                                       " tipoIdentificacionEmisor = @EmisorId" +
+                                                       " WHERE Id=@Id ",
+                                                        new SqlParameter("@NumeroConsecutivo", datos.NumeroConsecutivo),
+                                                        new SqlParameter("@TipoDocumento", datos.TipoDocumento),
+                                                        new SqlParameter("@FechaEmision", datos.FechaEmision),
+                                                        new SqlParameter("@NombreEmisor", datos.NombreEmisor),
+                                                        new SqlParameter("@IdEmisor", datos.Numero),
+                                                        new SqlParameter("@CodigoMoneda", datos.CodigoMoneda),
+                                                        new SqlParameter("@TotalComprobante", datos.TotalComprobante),
+                                                        new SqlParameter("@Id", id),
+                                                        new SqlParameter("@TotalImpuesto", datos.Impuesto),
+                                                        new SqlParameter("@EmisorId", datos.tipoIdentificacionEmisor));
+                                                    }
+                                                    else
+                                                    {
+
+                                                        db.Database.ExecuteSqlCommand("DELETE FROM BANDEJAENTRADA where Id=" + id);
+                                                        throw new Exception("Este documento no es para este usuario o ya esta registrado");
+                                                    }
+
+
+                                                }
+                                                catch (Exception ex) { }
+                                            }
+
+                                            if (i == menssage.Attachments.Count())
+                                            {
+                                                if (idGeneral > 0)
+                                                {
+                                                    var bandeja = db.BandejaEntrada.Where(a => a.Id == idGeneral).FirstOrDefault();
+
+                                                    if (bandeja.Pdf.Count() == 0)
+                                                    {
+                                                        db.Database.ExecuteSqlCommand("Update BandejaEntrada set Pdf=@Pdf " +
+
                                                    " WHERE Id=@Id ",
-                                                    new SqlParameter("@NumeroConsecutivo", datos.NumeroConsecutivo),
-                                                    new SqlParameter("@TipoDocumento", datos.TipoDocumento),
-                                                    new SqlParameter("@FechaEmision", datos.FechaEmision),
-                                                    new SqlParameter("@NombreEmisor", datos.NombreEmisor),
-                                                    new SqlParameter("@IdEmisor", datos.Numero),
-                                                    new SqlParameter("@CodigoMoneda", datos.CodigoMoneda),
-                                                    new SqlParameter("@TotalComprobante", datos.TotalComprobante),
-                                                    new SqlParameter("@Id", id),
-                                                    new SqlParameter("@TotalImpuesto", datos.Impuesto),
-                                                    new SqlParameter("@EmisorId", datos.tipoIdentificacionEmisor));
+                                                    new SqlParameter("@Pdf", ByteArrayPDF),
+
+                                                    new SqlParameter("@Id", idGeneral));
+                                                    }
+                                                    bandeja = db.BandejaEntrada.Where(a => a.Id == idGeneral).FirstOrDefault();
+                                                    db.Entry(bandeja).State = EntityState.Modified;
+                                                    bandeja.idAceptador = 0;
+                                                    bandeja.impuestoAcreditar = 0;
+                                                    bandeja.gastoAplicable = 0;
+                                                    bandeja.CodigoActividad = db.Sucursales.FirstOrDefault().CodActividadComercial;
+                                                    bandeja.XmlConfirmacion = G.GuardarPDF(ByteArrayPDF, bandeja.NumeroConsecutivo + "_" + bandeja.NombreEmisor);
+                                                    db.SaveChanges();
+
                                                 }
-                                                else
-                                                {
-
-                                                    db.Database.ExecuteSqlCommand("DELETE FROM BANDEJAENTRADA where Id=" + id);
-                                                    throw new Exception("Este documento no es para este usuario o ya esta registrado");
-                                                }
-
-
                                             }
-                                            catch (Exception ex) { }
-                                        }
 
-                                        if (i == menssage.Attachments.Count())
+                                            i++;
+                                        }
+                                        catch (Exception ex)
                                         {
-                                            if (idGeneral > 0)
-                                            {
-                                                var bandeja = db.BandejaEntrada.Where(a => a.Id == idGeneral).FirstOrDefault();
+                                            BitacoraErrores be = new BitacoraErrores();
+                                            be.DocNum = "";
+                                            be.Type = "";
+                                            be.Descripcion = ex.Message;
+                                            be.StackTrace = ex.StackTrace;
+                                            be.Fecha = DateTime.Now;
+                                            db.BitacoraErrores.Add(be);
+                                            db.SaveChanges();
 
-                                                if (bandeja.Pdf.Count() == 0)
-                                                {
-                                                    db.Database.ExecuteSqlCommand("Update BandejaEntrada set Pdf=@Pdf " +
-
-                                               " WHERE Id=@Id ",
-                                                new SqlParameter("@Pdf", ByteArrayPDF),
-
-                                                new SqlParameter("@Id", idGeneral));
-                                                }
-                                                bandeja = db.BandejaEntrada.Where(a => a.Id == idGeneral).FirstOrDefault();
-                                                db.Entry(bandeja).State = EntityState.Modified;
-                                                bandeja.idAceptador = 0;
-                                                bandeja.impuestoAcreditar = 0;
-                                                bandeja.gastoAplicable = 0;
-                                                bandeja.CodigoActividad = db.Sucursales.FirstOrDefault().CodActividadComercial;
-                                                bandeja.XmlConfirmacion = G.GuardarPDF(ByteArrayPDF, bandeja.NumeroConsecutivo + "_" + bandeja.NombreEmisor);
-                                                db.SaveChanges();
-
-                                            }
                                         }
-
-                                        i++;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        BitacoraErrores be = new BitacoraErrores();
-                                        be.DocNum = "";
-                                        be.Type = "";
-                                        be.Descripcion = ex.Message;
-                                        be.StackTrace = ex.StackTrace;
-                                        be.Fecha = DateTime.Now;
-                                        db.BitacoraErrores.Add(be);
-                                        db.SaveChanges();
-
                                     }
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                BitacoraErrores be = new BitacoraErrores();
-                                be.DocNum = "";
-                                be.Type = "";
-                                be.Descripcion = ex.Message;
-                                be.StackTrace = ex.StackTrace;
-                                be.Fecha = DateTime.Now;
-                                db.BitacoraErrores.Add(be);
-                                db.SaveChanges();
+                                catch (Exception ex)
+                                {
+                                    BitacoraErrores be = new BitacoraErrores();
+                                    be.DocNum = "";
+                                    be.Type = "";
+                                    be.Descripcion = ex.Message;
+                                    be.StackTrace = ex.StackTrace;
+                                    be.Fecha = DateTime.Now;
+                                    db.BitacoraErrores.Add(be);
+                                    db.SaveChanges();
 
+                                }
                             }
                         }
                     }
+                    
 
 
                 }

@@ -26,5 +26,6 @@ namespace WAConectorAPI.Models.ModelCliente
         public int? RecepcionPort { get; set; }
 
         public DateTime? RecepcionUltimaLecturaImap { get; set; }
+        public string Tenant { get; set; }
     }
 }
