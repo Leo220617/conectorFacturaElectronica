@@ -230,10 +230,12 @@ namespace WAConectorAPI.Controllers
                         // Get the e-mails for a specific user.
                         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                         var messages = await _graphServiceClient.Users[item.RecepcionEmail].Messages.Request().Filter("isRead eq false").GetAsync();
+                        var messageIds = new List<String>();
                         foreach (var message in messages)
                         {
+                            //await _graphServiceClient.Users[item.RecepcionEmail].Messages[message.Id].Request().UpdateAsync(new Microsoft.Graph.Message() { IsRead = true });
                             var menssage = await _graphServiceClient.Users[item.RecepcionEmail].Messages[message.Id].Request().Expand("attachments").GetAsync();
-
+                            messageIds.Add(menssage.Id.ToString());
                             if (menssage.Attachments.Count > 0)
                             {
                                 try
@@ -376,7 +378,10 @@ namespace WAConectorAPI.Controllers
 
                                 }
                             }
+
+
                         }
+                             
                     }
                     
 

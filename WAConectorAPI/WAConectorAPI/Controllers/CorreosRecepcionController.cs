@@ -85,7 +85,7 @@ namespace WAConectorAPI.Controllers
                     Correo.RecepcionPort = correo.RecepcionPort;
                     Correo.RecepcionUltimaLecturaImap = DateTime.Now.AddMonths(1);
                     Correo.RecepcionUseSSL = correo.RecepcionUseSSL;
-
+                    Correo.Tenant = "";
 
                     db.CorreosRecepcion.Add(Correo);
                     db.SaveChanges();

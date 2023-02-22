@@ -67,7 +67,7 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>07/22/2022 15:18:17</publishTime>
     </File>
     <File Include="Areas/HelpPage/Views/Web.config">
-      <publishTime>07/22/2022 15:18:17</publishTime>
+      <publishTime>02/20/2023 16:49:26</publishTime>
     </File>
     <File Include="Areas/HelpPage/Views/_ViewStart.cshtml">
       <publishTime>07/22/2022 15:18:17</publishTime>
@@ -77,6 +77,12 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
     </File>
     <File Include="bin/Antlr3.Runtime.pdb">
       <publishTime>07/22/2022 15:18:19</publishTime>
+    </File>
+    <File Include="bin/Azure.Core.dll">
+      <publishTime>02/06/2023 15:27:44</publishTime>
+    </File>
+    <File Include="bin/Azure.Identity.dll">
+      <publishTime>02/08/2023 20:47:38</publishTime>
     </File>
     <File Include="bin/BCrypt.Net.dll">
       <publishTime>07/22/2022 15:18:19</publishTime>
@@ -141,6 +147,9 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
     <File Include="bin/Microsoft.AspNetCore.Http.Features.dll">
       <publishTime>07/22/2022 15:18:19</publishTime>
     </File>
+    <File Include="bin/Microsoft.Bcl.AsyncInterfaces.dll">
+      <publishTime>10/18/2022 16:19:40</publishTime>
+    </File>
     <File Include="bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll">
       <publishTime>07/22/2022 15:18:19</publishTime>
     </File>
@@ -162,17 +171,38 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
     <File Include="bin/Microsoft.Extensions.Primitives.dll">
       <publishTime>07/22/2022 15:18:20</publishTime>
     </File>
+    <File Include="bin/Microsoft.Graph.Core.dll">
+      <publishTime>02/08/2023 14:04:26</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Graph.dll">
+      <publishTime>02/16/2023 13:20:46</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Identity.Client.dll">
+      <publishTime>12/19/2022 21:15:08</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Identity.Client.Extensions.Msal.dll">
+      <publishTime>12/20/2022 05:48:38</publishTime>
+    </File>
+    <File Include="bin/Microsoft.IdentityModel.Abstractions.dll">
+      <publishTime>02/16/2023 00:41:52</publishTime>
+    </File>
     <File Include="bin/microsoft.identitymodel.dll">
       <publishTime>07/22/2022 15:18:20</publishTime>
     </File>
     <File Include="bin/Microsoft.IdentityModel.JsonWebTokens.dll">
-      <publishTime>07/22/2022 15:18:20</publishTime>
+      <publishTime>02/16/2023 00:18:12</publishTime>
     </File>
     <File Include="bin/Microsoft.IdentityModel.Logging.dll">
-      <publishTime>07/22/2022 15:18:20</publishTime>
+      <publishTime>02/16/2023 00:20:42</publishTime>
+    </File>
+    <File Include="bin/Microsoft.IdentityModel.Protocols.dll">
+      <publishTime>02/07/2023 18:45:46</publishTime>
+    </File>
+    <File Include="bin/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll">
+      <publishTime>02/07/2023 18:56:48</publishTime>
     </File>
     <File Include="bin/Microsoft.IdentityModel.Tokens.dll">
-      <publishTime>07/22/2022 15:18:20</publishTime>
+      <publishTime>02/16/2023 00:26:50</publishTime>
     </File>
     <File Include="bin/Microsoft.Net.Http.Headers.dll">
       <publishTime>07/22/2022 15:18:20</publishTime>
@@ -352,7 +382,7 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
     <File Include="bin/System.Buffers.dll">
-      <publishTime>07/22/2022 15:18:20</publishTime>
+      <publishTime>02/19/2020 10:05:18</publishTime>
     </File>
     <File Include="bin/System.Collections.Concurrent.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
@@ -393,6 +423,9 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
     <File Include="bin/System.Diagnostics.Debug.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
+    <File Include="bin/System.Diagnostics.DiagnosticSource.dll">
+      <publishTime>04/14/2020 22:49:20</publishTime>
+    </File>
     <File Include="bin/System.Diagnostics.FileVersionInfo.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
@@ -430,7 +463,7 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
     <File Include="bin/System.IdentityModel.Tokens.Jwt.dll">
-      <publishTime>07/22/2022 15:18:20</publishTime>
+      <publishTime>02/16/2023 00:16:30</publishTime>
     </File>
     <File Include="bin/System.IO.Compression.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
@@ -477,14 +510,20 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
     <File Include="bin/System.Linq.Queryable.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
+    <File Include="bin/System.Memory.Data.dll">
+      <publishTime>04/08/2021 16:45:54</publishTime>
+    </File>
     <File Include="bin/System.Memory.dll">
-      <publishTime>07/22/2022 15:18:20</publishTime>
+      <publishTime>05/08/2022 03:31:02</publishTime>
     </File>
     <File Include="bin/System.Net.Http.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
     <File Include="bin/System.Net.Http.Formatting.dll">
       <publishTime>07/22/2022 15:18:19</publishTime>
+    </File>
+    <File Include="bin/System.Net.Http.WinHttpHandler.dll">
+      <publishTime>10/18/2022 16:27:34</publishTime>
     </File>
     <File Include="bin/System.Net.NameResolution.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
@@ -517,7 +556,7 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
     <File Include="bin/System.Numerics.Vectors.dll">
-      <publishTime>07/22/2022 15:18:20</publishTime>
+      <publishTime>05/15/2018 13:29:44</publishTime>
     </File>
     <File Include="bin/System.ObjectModel.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
@@ -541,7 +580,7 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
     <File Include="bin/System.Runtime.CompilerServices.Unsafe.dll">
-      <publishTime>07/22/2022 15:18:20</publishTime>
+      <publishTime>10/22/2021 23:40:18</publishTime>
     </File>
     <File Include="bin/System.Runtime.CompilerServices.VisualC.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
@@ -591,6 +630,9 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
     <File Include="bin/System.Security.Cryptography.Primitives.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
+    <File Include="bin/System.Security.Cryptography.ProtectedData.dll">
+      <publishTime>11/15/2019 08:41:08</publishTime>
+    </File>
     <File Include="bin/System.Security.Cryptography.X509Certificates.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
@@ -607,7 +649,10 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
     <File Include="bin/System.Text.Encodings.Web.dll">
-      <publishTime>07/22/2022 15:18:20</publishTime>
+      <publishTime>10/18/2022 16:31:48</publishTime>
+    </File>
+    <File Include="bin/System.Text.Json.dll">
+      <publishTime>11/18/2022 16:33:54</publishTime>
     </File>
     <File Include="bin/System.Text.RegularExpressions.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
@@ -620,6 +665,9 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
     </File>
     <File Include="bin/System.Threading.Tasks.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
+    </File>
+    <File Include="bin/System.Threading.Tasks.Extensions.dll">
+      <publishTime>02/19/2020 10:05:18</publishTime>
     </File>
     <File Include="bin/System.Threading.Tasks.Parallel.dll">
       <publishTime>07/18/2022 17:24:26</publishTime>
@@ -634,7 +682,7 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
     <File Include="bin/System.ValueTuple.dll">
-      <publishTime>07/18/2022 17:24:26</publishTime>
+      <publishTime>05/15/2018 13:29:52</publishTime>
     </File>
     <File Include="bin/System.Web.Cors.dll">
       <publishTime>07/22/2022 15:18:19</publishTime>
@@ -688,10 +736,10 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>07/18/2022 17:24:26</publishTime>
     </File>
     <File Include="bin/WAConectorAPI.dll">
-      <publishTime>02/02/2023 22:29:52</publishTime>
+      <publishTime>02/21/2023 23:39:48</publishTime>
     </File>
     <File Include="bin/WAConectorAPI.pdb">
-      <publishTime>02/02/2023 22:29:52</publishTime>
+      <publishTime>02/21/2023 23:39:48</publishTime>
     </File>
     <File Include="bin/WebGrease.dll">
       <publishTime>07/22/2022 15:18:20</publishTime>
@@ -787,7 +835,7 @@ edite el archivo MSBuild. Visite https://go.microsoft.com/fwlink/?LinkID=208121 
       <publishTime>07/22/2022 15:18:17</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>02/02/2023 22:29:53</publishTime>
+      <publishTime>02/21/2023 23:02:31</publishTime>
     </File>
   </ItemGroup>
 </Project>
