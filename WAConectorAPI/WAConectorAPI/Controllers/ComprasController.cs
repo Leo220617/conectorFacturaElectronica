@@ -233,7 +233,7 @@ namespace WAConectorAPI.Controllers
                         var messageIds = new List<String>();
                         foreach (var message in messages)
                         {
-                            //await _graphServiceClient.Users[item.RecepcionEmail].Messages[message.Id].Request().UpdateAsync(new Microsoft.Graph.Message() { IsRead = true });
+                            await _graphServiceClient.Users[item.RecepcionEmail].Messages[message.Id].Request().UpdateAsync(new Microsoft.Graph.Message() { IsRead = true });
                             var menssage = await _graphServiceClient.Users[item.RecepcionEmail].Messages[message.Id].Request().Expand("attachments").GetAsync();
                             messageIds.Add(menssage.Id.ToString());
                             if (menssage.Attachments.Count > 0)
