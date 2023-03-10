@@ -222,52 +222,9 @@ namespace WAConectorAPI.Controllers
                         else
                         {
                             //Generacion del nodo hijo de receptor de identificacion
-                            xml.receptor.correo_electronico = enc.Email;
-                            xml.receptor.telefono = new telefono();
-                            xml.receptor.telefono.cod_pais = "506";
-                            xml.receptor.telefono.numero = enc.Telefono;
-
                             xml.receptor.identificacion = new identificacion();
                             xml.receptor.identificacion.tipo = enc.TipoIdentificacion;
                             xml.receptor.identificacion.numero = enc.LicTradNum;
-
-                            //Generacion del nodo hijo de receptor de ubicacion
-                            try
-                            {
-                                var Para = db.Parametros.FirstOrDefault();
-                                var SQL = " " + Para.UbicacionCliente + "'" + enc.CardCode + "' ";
-                                var conexion = DevuelveCadena(enc.idSucursal);
-
-                                SqlConnection Cn = new SqlConnection(conexion);
-                                SqlCommand Cmd = new SqlCommand(SQL, Cn);
-                                SqlDataAdapter Da = new SqlDataAdapter(Cmd);
-                                DataSet Ds = new DataSet();
-                                Cn.Open();
-                                Da.Fill(Ds, "Proveedor");
-
-                                var Provincia = Convert.ToInt32(Ds.Tables["Proveedor"].Rows[0]["State"].ToString());
-                                var Canton = Ds.Tables["Proveedor"].Rows[0]["County"].ToString();
-                                var Distrito = Ds.Tables["Proveedor"].Rows[0]["Block"].ToString();
-
-
-
-                                Cn.Close();
-                                xml.receptor.ubicacion = new ubicacion();
-                                xml.receptor.ubicacion.provincia = Provincia.ToString();
-                                xml.receptor.ubicacion.canton = db.Cantones.Where(a => a.NomCanton.ToLower().Contains(Canton.ToLower())).FirstOrDefault().CodCanton.ToString();
-                                var canton = db.Cantones.Where(a => a.NomCanton.ToLower().Contains(Canton.ToLower())).FirstOrDefault().CodCanton;
-                                xml.receptor.ubicacion.distrito = db.Distritos.Where(a => a.NomDistrito.ToLower().Contains(Distrito.ToLower()) && a.CodCanton == canton && a.CodProvincia == Provincia).FirstOrDefault().CodDistrito.ToString();
-                                var distrito = db.Distritos.Where(a => a.NomDistrito.ToLower().Contains(Distrito.ToLower()) && a.CodCanton == canton && a.CodProvincia == Provincia).FirstOrDefault().CodDistrito;
-                                xml.receptor.ubicacion.barrio = db.Barrios.Where(a => a.NomBarrio.ToLower().Contains(Distrito.ToLower())).FirstOrDefault() != null ? db.Barrios.Where(a => a.NomBarrio.ToLower().Contains(Distrito.ToLower())).FirstOrDefault().CodBarrio.ToString() : "1";
-                                xml.receptor.ubicacion.sennas = Ds.Tables["Proveedor"].Rows[0]["Street"].ToString();
-                            }
-                            catch (Exception ex)
-                            {
-
-                               
-                            }
-                           
-
                         }
 
 

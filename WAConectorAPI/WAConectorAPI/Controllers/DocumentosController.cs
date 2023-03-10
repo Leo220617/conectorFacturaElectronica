@@ -236,7 +236,6 @@ namespace WAConectorAPI.Controllers
                     enc.LicTradNum = Ds.Tables["Encabezado"].Rows[0]["Identificacion"].ToString();
                     enc.LicTradNum = enc.LicTradNum.Replace("-", "");
                     enc.Email = Ds.Tables["Encabezado"].Rows[0]["Correo"].ToString();
-                    enc.Telefono = Ds.Tables["Encabezado"].Rows[0]["Telefono"].ToString();
                     enc.CodActividadEconomica = Ds.Tables["Encabezado"].Rows[0]["ActividadEconomicaEmisor"].ToString();//Sucursal.CodActividadComercial;
 
                     if (enc.LicTradNum.Length == 9)
