@@ -262,7 +262,7 @@ namespace WAConectorAPI.Controllers
                             catch (Exception ex)
                             {
 
-
+                                xml.receptor.ubicacion = null;
                             }
                         }
 
