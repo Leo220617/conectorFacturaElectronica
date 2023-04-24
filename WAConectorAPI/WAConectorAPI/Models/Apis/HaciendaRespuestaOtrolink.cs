@@ -20,5 +20,7 @@ namespace WAConectorAPI.Models.Apis
 
         [JsonProperty("respuesta-xml")]
         public string respuesta_xml { get; set; }
+
+        
     }
 }
