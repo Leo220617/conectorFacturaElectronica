@@ -216,7 +216,7 @@ namespace WAConectorAPI.Controllers
                 }
                 else
                 {
-                    foreach(var item in Correos)
+                    foreach (var item in Correos)
                     {
                         var credentials = new ClientSecretCredential(
                 item.Tenant,
@@ -381,9 +381,9 @@ namespace WAConectorAPI.Controllers
 
 
                         }
-                             
+
                     }
-                    
+
 
 
                 }
