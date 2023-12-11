@@ -12,5 +12,6 @@ namespace WAConectorAPI.Models.Apis
         public int code { get; set; }
         public string hacienda_mensaje { get; set; }
         public string xml_error { get; set; }
+        public string error { get; set; }
     }
 }

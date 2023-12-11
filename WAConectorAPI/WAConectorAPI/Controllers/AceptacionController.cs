@@ -32,6 +32,7 @@ namespace WAConectorAPI.Controllers
                     filtro.FechaFinal = filtro.FechaFinal.AddDays(1);
                     
                 }
+                
                 var Compras = db.BandejaEntrada.Where(a => (filtro.FechaInicial != time ? a.FechaIngreso >= filtro.FechaInicial : true) && (filtro.FechaFinal != time ? a.FechaIngreso <= filtro.FechaFinal : true) && a.XmlConfirmacion != null).ToList();
 
 

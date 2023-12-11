@@ -1176,10 +1176,32 @@ namespace WAConectorAPI.Controllers
                             {
                                 response.Content.Headers.ContentType.MediaType = "application/json";
                                 var resp = await response.Content.ReadAsAsync<respuesta>();
+
+                                try
+                                {
+                                    RespuestasCyber respCyber = new RespuestasCyber();
+                                    respCyber.Detalle = "Documento No. " + DocNum + " tiene la respuesta -> " + resp.error == null ? resp.hacienda_mensaje : resp.error;
+                                    db.RespuestasCyber.Add(respCyber);
+                                    db.SaveChanges();
+                                }
+                                catch (Exception ex)
+                                {
+                                    BitacoraErrores be = new BitacoraErrores();
+                                    be.DocNum = DocNum;
+                                    be.Type = ObjType;
+                                    be.Descripcion = ex.Message;
+                                    be.StackTrace = ex.StackTrace;
+                                    be.Fecha = DateTime.Now;
+                                    db.BitacoraErrores.Add(be);
+                                    db.SaveChanges();
+
+                                }
+                                
+
                                 db.Entry(Factura).State = System.Data.Entity.EntityState.Modified;
                                 Factura.procesadaHacienda = true;
                                 Factura.code = resp.code;
-                                Factura.RespuestaHacienda = resp.hacienda_mensaje == null ? resp.xml_error : resp.hacienda_mensaje;// resp.hacienda_mensaje;
+                                Factura.RespuestaHacienda = resp.error == null ? resp.hacienda_mensaje == null ? resp.xml_error : resp.hacienda_mensaje : resp.error;// resp.hacienda_mensaje;
                                 Factura.XMLFirmado = resp.data;
                                 Factura.JSON = JsonConvert.SerializeObject(xml);
                                 Factura.ClaveHacienda = resp.clave;
@@ -1332,6 +1354,17 @@ namespace WAConectorAPI.Controllers
                                     Documentos.XMLFirmado = resp2.data.respuesta_xml;
                                     db.SaveChanges();
                                 }
+                            }else if(resp2.data.ind_estado.Contains("rechazado"))
+                            {
+                                var Documentos = db.EncDocumento.Where(a => a.ClaveHacienda == Clave).FirstOrDefault();
+
+                                if (Documentos != null)
+                                {
+                                    db.Entry(Documentos).State = System.Data.Entity.EntityState.Modified;
+                                    Documentos.RespuestaHacienda = resp2.data.ind_estado;
+                                    Documentos.XMLFirmado = resp2.data.respuesta_xml;
+                                    db.SaveChanges();
+                                }
                             }
 
                             return Request.CreateResponse(HttpStatusCode.OK, resp2);
@@ -1340,6 +1373,18 @@ namespace WAConectorAPI.Controllers
                         {
                             var resp2 = await response2.Content.ReadAsAsync<HaciendaRespuestaOtrolink>();
                             if (resp2.hacienda_result.ind_estado.Contains("aceptado"))
+                            {
+                                var Documentos = db.EncDocumento.Where(a => a.ClaveHacienda == Clave).FirstOrDefault();
+
+                                if (Documentos != null)
+                                {
+                                    db.Entry(Documentos).State = System.Data.Entity.EntityState.Modified;
+                                    Documentos.RespuestaHacienda = resp2.hacienda_result.ind_estado;
+                                    Documentos.XMLFirmado = resp2.hacienda_result.respuesta_xml;
+                                    db.SaveChanges();
+                                }
+                            }
+                            else if (resp2.hacienda_result.ind_estado.Contains("rechazado"))
                             {
                                 var Documentos = db.EncDocumento.Where(a => a.ClaveHacienda == Clave).FirstOrDefault();
 
