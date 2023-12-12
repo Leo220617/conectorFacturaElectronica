@@ -504,7 +504,7 @@ namespace WAConectorAPI.Controllers
 
                                     Cn2.Close();
                                     decimal total = 0;
-                                    if (det.unidadMedida == "Sp")
+                                    if (det.unidadMedida == "Sp" || det.unidadMedida == "St")
                                     {
                                         if (Impuesto.tarifa > 0)
                                         {
@@ -589,7 +589,7 @@ namespace WAConectorAPI.Controllers
                                 det.exonMonExo = 0;
 
                                 decimal total = 0;
-                                if (det.unidadMedida == "Sp")
+                                if (det.unidadMedida == "Sp" || det.unidadMedida == "St")
                                 {
                                     if (Impuesto.tarifa > 0)
                                     {
@@ -665,7 +665,7 @@ namespace WAConectorAPI.Controllers
                             det.exonMonExo = 0;
 
                             decimal total = 0;
-                            if (det.unidadMedida == "Sp")
+                            if (det.unidadMedida == "Sp" || det.unidadMedida == "St")
                             {
                                 if (Impuesto.tarifa > 0)
                                 {
