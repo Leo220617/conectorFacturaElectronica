@@ -1028,8 +1028,8 @@ namespace WAConectorAPI.Controllers
                     cliente.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     try
                     {
+                        cliente.Timeout = TimeSpan.FromMinutes(30);
                         HttpResponseMessage response = await cliente.PostAsync(parametros.urlCyber, httpContent);
-
                         if (response.IsSuccessStatusCode)
                         {
                             response.Content.Headers.ContentType.MediaType = "application/json";
