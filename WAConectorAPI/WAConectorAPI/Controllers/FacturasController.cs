@@ -29,30 +29,25 @@ namespace WAConectorAPI.Controllers
                 {
                     filtro.FechaFinal = filtro.FechaFinal.AddDays(1);
                 }
-                var Documentos = db.EncDocumento.Where( a =>(filtro.FechaInicial != time ? a.Fecha >= filtro.FechaInicial : true) && (filtro.FechaFinal != time ? a.Fecha <= filtro.FechaFinal : true)).ToList();
+                var Documentos = db.EncDocumento.Where( a =>(filtro.FechaInicial != time ? a.Fecha >= filtro.FechaInicial : true) 
+                && (filtro.FechaFinal != time ? a.Fecha <= filtro.FechaFinal : true)
+                && (!string.IsNullOrEmpty(filtro.Texto) ? a.moneda.ToUpper().Contains(filtro.Texto.ToUpper()): true)
+                && (!string.IsNullOrEmpty(filtro.Estado) ?  (filtro.Estado != "NULL" ? a.RespuestaHacienda != null && a.RespuestaHacienda.ToUpper().Contains(filtro.Estado.ToUpper()) : true) : true)
+                && (!string.IsNullOrEmpty(filtro.CodMoneda) ? (filtro.CodMoneda != "NULL" ? a.TipoDocumento.ToUpper().Contains(filtro.CodMoneda.ToUpper()) : true)  : true)
+                
+                ).ToList();
+                 
 
-                if (!string.IsNullOrEmpty(filtro.Texto))
-                {
-                    Documentos = Documentos.Where(a => a.moneda.ToUpper().Contains(filtro.Texto.ToUpper())).ToList();
-                }
+                //if(!string.IsNullOrEmpty(filtro.Estado))
+                //{
+                //    if(filtro.Estado != "NULL")
+                //    {
+                //        Documentos = Documentos.Where(a => a.RespuestaHacienda != null).ToList();
+                //        Documentos = Documentos.Where(a => a.RespuestaHacienda.ToUpper().Contains(filtro.Estado.ToUpper())).ToList();
 
-                if(!string.IsNullOrEmpty(filtro.Estado))
-                {
-                    if(filtro.Estado != "NULL")
-                    {
-                        Documentos = Documentos.Where(a => a.RespuestaHacienda != null).ToList();
-                        Documentos = Documentos.Where(a => a.RespuestaHacienda.ToUpper().Contains(filtro.Estado.ToUpper())).ToList();
-
-                    }
-                }
-                if (!string.IsNullOrEmpty(filtro.CodMoneda))
-                {
-                    if (filtro.CodMoneda != "NULL")
-                    {
-                        Documentos = Documentos.Where(a => a.TipoDocumento.ToUpper().Contains(filtro.CodMoneda.ToUpper())).ToList();
-
-                    }
-                }
+                //    }
+                //}
+                
 
               
 
