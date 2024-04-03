@@ -1151,6 +1151,52 @@ namespace WAConectorAPI.Controllers
         }
 
 
+        [Route("api/Compras/Prueba")] //Metodo para cuando el pdf no fue leido correctamente
+        public HttpResponseMessage GetPrueba()
+        {
+
+            try
+            {
+                G G = new G();
+
+                var Facturas = db.BandejaEntrada.Where(a => a.XmlConfirmacion == "" || a.XmlConfirmacion == null).ToList();
+
+
+                foreach (var item in Facturas)
+                {
+                    var pdfResp = G.GuardarPDF(item.Pdf, item.NumeroConsecutivo + "_" + item.NombreEmisor);
+
+                    db.Entry(item).State = EntityState.Modified;
+
+                    item.XmlConfirmacion = pdfResp;
+
+                    db.SaveChanges();
+                }
+
+
+                 
+                return Request.CreateResponse(HttpStatusCode.OK, HttpContext.Current.Server.MapPath("~").ToString());
+            }
+            catch (Exception ex)
+            {
+
+                BitacoraErrores be = new BitacoraErrores();
+                be.Descripcion = ex.Message;
+                be.StackTrace = ex.StackTrace;
+                be.Fecha = DateTime.Now;
+                db.BitacoraErrores.Add(be);
+                db.SaveChanges();
+                 
+
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+
+
+            }
+
+
+
+        }
+
         [Route("api/Compras/Correo")]
         public async System.Threading.Tasks.Task<HttpResponseMessage> GetPruebaCorreo()
         {

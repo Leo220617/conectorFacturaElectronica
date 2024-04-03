@@ -33,7 +33,26 @@ namespace WAConectorAPI.Controllers
                     
                 }
                 
-                var Compras = db.BandejaEntrada.Where(a => (filtro.FechaInicial != time ? a.FechaIngreso >= filtro.FechaInicial : true) 
+                var Compras = db.BandejaEntrada.Select(a => new {
+                    a.Id,
+                    a.NumeroConsecutivo,
+                    a.IdEmisor,
+                    a.NombreEmisor,
+                    a.FechaIngreso,
+                    a.FechaEmision,
+                    a.CodigoMoneda,
+                    a.TotalComprobante,
+                    a.Impuesto,
+                    a.tipo,
+                    a.DetalleMensaje,
+                    a.RespuestaHacienda,
+                    a.idAceptador,
+                    a.Procesado,
+                    a.XMLRespuesta,
+                    a.XmlConfirmacion 
+                }
+
+                    ).Where(a => (filtro.FechaInicial != time ? a.FechaIngreso >= filtro.FechaInicial : true) 
                 && (filtro.FechaFinal != time ? a.FechaIngreso <= filtro.FechaFinal : true) 
                 && a.XmlConfirmacion != null 
                 && (!string.IsNullOrEmpty(filtro.Estado) ? (filtro.Estado != "NULL" ? a.Procesado == filtro.Estado  : true) : true)
