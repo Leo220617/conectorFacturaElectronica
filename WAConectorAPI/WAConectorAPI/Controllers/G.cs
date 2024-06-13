@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Xml;
+using System.Xml.Linq;
 using WAConectorAPI.Models.ModelCliente;
 
 namespace WAConectorAPI.Controllers
@@ -64,7 +67,43 @@ namespace WAConectorAPI.Controllers
                 return mso.ToArray();
             }
         }
+        //public string UnZip(byte[] compressedBytes)
+        //{
+        //    using (var msi = new MemoryStream(compressedBytes))
+        //    using (var mso = new MemoryStream())
+        //    {
+        //        using (var gs = new GZipStream(msi, CompressionMode.Decompress))
+        //        {
+        //            CopyTo(gs, mso);
+        //        }
 
+        //        return Encoding.UTF8.GetString(mso.ToArray());
+        //    }
+        //}
+
+        public string UnZip(byte[] compressedBytes)
+        {
+            using (var msi = new MemoryStream(compressedBytes))
+            using (var mso = new MemoryStream())
+            {
+                using (var gs = new GZipStream(msi, CompressionMode.Decompress))
+                {
+                    // Leer los datos descomprimidos en un búfer temporal
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    while ((bytesRead = gs.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        mso.Write(buffer, 0, bytesRead);
+                    }
+                }
+
+                // Colocar el puntero al principio del flujo de salida para leerlo correctamente
+                mso.Seek(0, SeekOrigin.Begin);
+
+                // Leer los datos descomprimidos del flujo de salida como una cadena UTF-8
+                return Encoding.UTF8.GetString(mso.ToArray());
+            }
+        }
         public void CopyTo(Stream src, Stream dest)
         {
             byte[] bytes = new byte[4096];
@@ -155,9 +194,126 @@ namespace WAConectorAPI.Controllers
                     
 
                 }
-                 
 
+                CultureInfo culture = CultureInfo.InvariantCulture;
                 facturaxml.IdReceptor = GetXmlIdReceptor.Match(GetXmlReceptor.Match(xml).ToString().Replace("<Receptor>", "").Replace("</Receptor>", "")).ToString().Replace("<Numero>", "").Replace("</Numero>", "");
+                decimal iva1 = 0;
+                decimal iva2 = 0;
+                decimal iva4 = 0;
+                decimal iva8 = 0;
+                decimal iva13 = 0;
+               
+
+                var xml2 = ConvertirArchivoaXElement(xml,facturaxml.IdReceptor);
+                foreach (var item2 in xml2.Elements().Where(m => m.Name.LocalName == "DetalleServicio").Elements())
+                {
+                    
+
+                    var ExoneracionPorcentajeCompra = decimal.Parse(ExtraerValorDeNodoXml(item2, "Impuesto/Exoneracion/PorcentajeCompra", true), culture);
+                    var ImpuestoTarifa = Convert.ToDecimal(ExtraerValorDeNodoXml(item2, "Impuesto/Tarifa", true), culture);
+                    var ImpuestoMonto = decimal.Parse(ExtraerValorDeNodoXml(item2, "Impuesto/Monto", true), culture);
+                    var SubTotal = decimal.Parse(ExtraerValorDeNodoXml(item2, "SubTotal", true), culture);
+                    var MontoDescuento = decimal.Parse(ExtraerValorDeNodoXml(item2.Elements().Where(a => a.Name.LocalName == "Descuento").FirstOrDefault(), "MontoDescuento", true), culture);
+
+                    int opcion = Convert.ToInt32(ImpuestoTarifa);
+                    decimal cantidadImpuesto = 0;
+                    bool bandera = false;
+                    if (ExoneracionPorcentajeCompra > 0)
+                    {
+                        bandera = true;
+                        cantidadImpuesto = opcion - ExoneracionPorcentajeCompra;
+                    }
+                    switch (opcion)
+                    {
+                        case 1:
+                            {
+                                if (!bandera)
+                                {
+                                    iva1 += ImpuestoMonto;
+                                }
+                                else
+                                {
+                                    if (cantidadImpuesto > 0)
+                                    {
+                                        iva1 += ((SubTotal - MontoDescuento) * (cantidadImpuesto / 100));
+                                    }
+                                }
+                                break;
+                            }
+                        case 2:
+                            {
+                                if (!bandera)
+                                {
+                                    iva2 += ImpuestoMonto;
+                                }
+                                else
+                                {
+                                    if (cantidadImpuesto > 0)
+                                    {
+                                        iva2 += ((SubTotal - MontoDescuento) * (cantidadImpuesto / 100));
+                                    }
+                                }
+                                break;
+                            }
+                        case 4:
+                            {
+                                if (!bandera)
+                                {
+                                    iva4 += ImpuestoMonto;
+
+                                }
+                                else
+                                {
+                                    if (cantidadImpuesto > 0)
+                                    {
+                                        iva4 += ((SubTotal - MontoDescuento) * (cantidadImpuesto / 100));
+                                    }
+                                }
+                                break;
+                            }
+                        case 8:
+                            {
+                                if (!bandera)
+                                {
+                                    iva8 += ImpuestoMonto;
+                                }
+                                else
+                                {
+                                    if (cantidadImpuesto > 0)
+                                    {
+                                        iva8 += ((SubTotal - MontoDescuento) * (cantidadImpuesto / 100));
+                                    }
+                                }
+                                break;
+                            }
+                        case 13:
+                            {
+                                if (!bandera)
+                                {
+                                    iva13 += ImpuestoMonto;
+                                }
+                                else
+                                {
+                                    if (cantidadImpuesto > 0)
+                                    {
+                                        iva13 += ((SubTotal - MontoDescuento) * (cantidadImpuesto / 100));
+                                    }
+                                }
+                                break;
+                            }
+                    }
+
+
+              
+                }
+
+                facturaxml.IVA0 = 0;
+                facturaxml.IVA1 = iva1;
+                facturaxml.IVA2 = iva2;
+                facturaxml.IVA4 = iva4;
+                facturaxml.IVA8 = iva8;
+                facturaxml.IVA13 = iva13;
+
             }
             catch (Exception ex)
             {
@@ -165,8 +321,107 @@ namespace WAConectorAPI.Controllers
             }
             return facturaxml;
         }
+        public static string ExtraerValorDeNodoXml(System.Xml.Linq.XElement elemento, string nombre, bool retornarCero = false)
+        {
+            try
+            {
+                string[] nombres = nombre.Split('/');
+                string valor = "";
+
+                if (nombres.Length == 1)
+                    valor = elemento.Elements().Where(m => m.Name.LocalName == nombres[0]).FirstOrDefault().Value;
+                else if (nombres.Length == 2)
+                    valor = elemento.Elements().Where(m => m.Name.LocalName == nombres[0]).FirstOrDefault()
+                        .Elements().Where(m => m.Name.LocalName == nombres[1]).FirstOrDefault().Value;
+                else if (nombres.Length == 3)
+                    valor = elemento.Elements().Where(m => m.Name.LocalName == nombres[0]).FirstOrDefault()
+                        .Elements().Where(m => m.Name.LocalName == nombres[1]).FirstOrDefault()
+                        .Elements().Where(m => m.Name.LocalName == nombres[2]).FirstOrDefault().Value;
+                else if (nombres.Length == 4)
+                    valor = elemento.Elements().Where(m => m.Name.LocalName == nombres[0]).FirstOrDefault()
+                        .Elements().Where(m => m.Name.LocalName == nombres[1]).FirstOrDefault()
+                        .Elements().Where(m => m.Name.LocalName == nombres[2]).FirstOrDefault()
+                        .Elements().Where(m => m.Name.LocalName == nombres[3]).FirstOrDefault().Value;
+
+                return valor;
+            }
+            catch (Exception ex)
+            {
+                if (retornarCero)
+                    return "0";
+                else
+                    return "";
+            }
+        }
+        public static XElement ConvertirArchivoaXElement(string result, string CodEmpresa = "1")
+        {
+            string codEmpresa = CodEmpresa;
+            XElement xml = null;
+            try
+            {
+                xml = XDocument.Parse(result).Elements().FirstOrDefault();
+            }
+
+            catch (Exception e)
+            {
+                // Error por UTF8 BOM .
+                // leer el archivo original y convertirlo sin UTF8
 
 
+
+                string rutaTemp = HttpContext.Current.Server.MapPath("~") + "\\Temp\\";
+
+                if (!System.IO.Directory.Exists(rutaTemp))
+                    System.IO.Directory.CreateDirectory(rutaTemp);
+
+                string fic = HttpContext.Current.Server.MapPath("~") + $"\\Temp\\{codEmpresa}{TimeStamp(DateTime.Now)}.txt";
+                string texto = result;
+
+                System.IO.StreamWriter sw = new System.IO.StreamWriter(fic);
+                sw.WriteLine(texto);
+                sw.Close();
+                // HttpContext.Current.Server.MapPath("~") + @"\" + nombreArchivo
+
+                System.IO.StreamReader objReader = new System.IO.StreamReader(fic);
+                texto = objReader.ReadToEnd();
+                objReader.Close();
+
+                // borrar archivod espues de utilizado
+                System.IO.File.Delete(fic);
+                try
+                {
+                    xml = XDocument.Parse(texto).Elements().FirstOrDefault();
+
+                }
+                catch (Exception ex)
+                {
+                  
+                    int inicio = texto.IndexOf("<ds:Signature");
+                    int fin = texto.IndexOf("</ds:Signature>") + "</ds:Signature>".Length;
+
+                    string parte1 = texto.Substring(0, inicio);
+                   
+                    string parte3 = texto.Substring(fin);
+
+                    // Cargar el XML en un objeto XmlDocument
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(parte1 + parte3);
+
+                    // Obtener el XML correctamente formateado
+                    xml = XDocument.Parse(doc.OuterXml).Elements().FirstOrDefault(); 
+
+                }
+            }
+
+            return xml;
+        }
+        public static string TimeStamp(DateTime fechaActual)
+        {
+            long ticks = fechaActual.Ticks - DateTime.Parse("01/01/1970 00:00:00").Ticks;
+            ticks /= 10000000; //Convert windows ticks to seconds
+            return ticks.ToString();
+
+        }
         public static string Base64Encode(string plainText)
         {
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
@@ -193,6 +448,12 @@ namespace WAConectorAPI.Controllers
             IdReceptor = "";
             Impuesto = 0;
             tipoIdentificacionEmisor = "";
+            IVA0 = 0;
+            IVA1 = 0;
+            IVA2 = 0;
+            IVA4 = 0;
+            IVA8 = 0;
+            IVA13 = 0;
         }
 
         public string NumeroConsecutivo { get; set; }
@@ -206,6 +467,16 @@ namespace WAConectorAPI.Controllers
         public string IdReceptor { get; set; }
         public decimal Impuesto { get; set; }
         public string tipoIdentificacionEmisor { get; set; }
+        public decimal IVA0 { get; set; }
+        public decimal IVA1 { get; set; }
+
+        public decimal IVA2 { get; set; }
+
+        public decimal IVA4 { get; set; }
+
+        public decimal IVA8 { get; set; }
+
+        public decimal IVA13 { get; set; }
     }
 
 

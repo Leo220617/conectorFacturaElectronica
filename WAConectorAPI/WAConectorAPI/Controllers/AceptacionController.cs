@@ -27,11 +27,11 @@ namespace WAConectorAPI.Controllers
             try
             {
                 DateTime time = new DateTime();
-                if (filtro.FechaFinal != time)
-                {
-                    filtro.FechaFinal = filtro.FechaFinal.AddDays(1);
+                //if (filtro.FechaFinal != time)
+                //{
+                //    filtro.FechaFinal = filtro.FechaFinal.AddDays(1);
                     
-                }
+                //}
                 
                 var Compras = db.BandejaEntrada.Select(a => new {
                     a.Id,
@@ -49,7 +49,12 @@ namespace WAConectorAPI.Controllers
                     a.idAceptador,
                     a.Procesado,
                     a.XMLRespuesta,
-                    a.XmlConfirmacion 
+                    a.XmlConfirmacion ,
+                    a.IVA1,
+                    a.IVA2,
+                    a.IVA4,
+                    a.IVA8,
+                    a.IVA13
                 }
 
                     ).Where(a => (filtro.FechaInicial != time ? a.FechaIngreso >= filtro.FechaInicial : true) 

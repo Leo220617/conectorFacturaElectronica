@@ -121,7 +121,12 @@ namespace WAConectorAPI.Controllers
                                                            " NombreEmisor = @NombreEmisor,IdEmisor = @IdEmisor ,CodigoMoneda = @CodigoMoneda , " +
                                                            " TotalComprobante = @TotalComprobante, " +
                                                            " Impuesto = @TotalImpuesto, " +
-                                                           " tipoIdentificacionEmisor = @EmisorId" +
+                                                           " tipoIdentificacionEmisor = @EmisorId, " +
+                                                           " IVA1 = @IVA1, " +
+                                                           " IVA2 = @IVA2, " +
+                                                           " IVA4 = @IVA4, " +
+                                                           " IVA8 = @IVA8, " +
+                                                           " IVA13 = @IVA13" +
                                                            " WHERE Id=@Id ",
                                                             new SqlParameter("@NumeroConsecutivo", datos.NumeroConsecutivo),
                                                             new SqlParameter("@TipoDocumento", datos.TipoDocumento),
@@ -132,7 +137,13 @@ namespace WAConectorAPI.Controllers
                                                             new SqlParameter("@TotalComprobante", datos.TotalComprobante),
                                                             new SqlParameter("@Id", id),
                                                             new SqlParameter("@TotalImpuesto", datos.Impuesto),
-                                                            new SqlParameter("@EmisorId", datos.tipoIdentificacionEmisor));
+                                                            new SqlParameter("@EmisorId", datos.tipoIdentificacionEmisor),
+                                                            new SqlParameter("@IVA1", datos.IVA1),
+                                                            new SqlParameter("@IVA2", datos.IVA2),
+                                                            new SqlParameter("@IVA4", datos.IVA4),
+                                                            new SqlParameter("@IVA8", datos.IVA8),
+                                                            new SqlParameter("@IVA13", datos.IVA13)
+                                                            );
                                                         }
                                                         else
                                                         {
@@ -293,22 +304,33 @@ namespace WAConectorAPI.Controllers
                                                     if (datos.IdReceptor == db.Sucursales.FirstOrDefault().Cedula && Detalle == null && !string.IsNullOrEmpty(datos.NumeroConsecutivo))
                                                     {
                                                         db.Database.ExecuteSqlCommand("Update BandejaEntrada set NumeroConsecutivo=@NumeroConsecutivo, " +
-                                                       " TipoDocumento = @TipoDocumento, FechaEmision = @FechaEmision , " +
-                                                       " NombreEmisor = @NombreEmisor,IdEmisor = @IdEmisor ,CodigoMoneda = @CodigoMoneda , " +
-                                                       " TotalComprobante = @TotalComprobante, " +
-                                                       " Impuesto = @TotalImpuesto, " +
-                                                       " tipoIdentificacionEmisor = @EmisorId" +
-                                                       " WHERE Id=@Id ",
-                                                        new SqlParameter("@NumeroConsecutivo", datos.NumeroConsecutivo),
-                                                        new SqlParameter("@TipoDocumento", datos.TipoDocumento),
-                                                        new SqlParameter("@FechaEmision", datos.FechaEmision),
-                                                        new SqlParameter("@NombreEmisor", datos.NombreEmisor),
-                                                        new SqlParameter("@IdEmisor", datos.Numero),
-                                                        new SqlParameter("@CodigoMoneda", datos.CodigoMoneda),
-                                                        new SqlParameter("@TotalComprobante", datos.TotalComprobante),
-                                                        new SqlParameter("@Id", id),
-                                                        new SqlParameter("@TotalImpuesto", datos.Impuesto),
-                                                        new SqlParameter("@EmisorId", datos.tipoIdentificacionEmisor));
+                                                            " TipoDocumento = @TipoDocumento, FechaEmision = @FechaEmision , " +
+                                                            " NombreEmisor = @NombreEmisor,IdEmisor = @IdEmisor ,CodigoMoneda = @CodigoMoneda , " +
+                                                            " TotalComprobante = @TotalComprobante, " +
+                                                            " Impuesto = @TotalImpuesto, " +
+                                                            " tipoIdentificacionEmisor = @EmisorId, " +
+                                                            " IVA1 = @IVA1, " +
+                                                            " IVA2 = @IVA2, " +
+                                                            " IVA4 = @IVA4, " +
+                                                            " IVA8 = @IVA8, " +
+                                                            " IVA13 = @IVA13" +
+                                                            " WHERE Id=@Id ",
+                                                             new SqlParameter("@NumeroConsecutivo", datos.NumeroConsecutivo),
+                                                             new SqlParameter("@TipoDocumento", datos.TipoDocumento),
+                                                             new SqlParameter("@FechaEmision", datos.FechaEmision),
+                                                             new SqlParameter("@NombreEmisor", datos.NombreEmisor),
+                                                             new SqlParameter("@IdEmisor", datos.Numero),
+                                                             new SqlParameter("@CodigoMoneda", datos.CodigoMoneda),
+                                                             new SqlParameter("@TotalComprobante", datos.TotalComprobante),
+                                                             new SqlParameter("@Id", id),
+                                                             new SqlParameter("@TotalImpuesto", datos.Impuesto),
+                                                             new SqlParameter("@EmisorId", datos.tipoIdentificacionEmisor),
+                                                             new SqlParameter("@IVA1", datos.IVA1),
+                                                             new SqlParameter("@IVA2", datos.IVA2),
+                                                             new SqlParameter("@IVA4", datos.IVA4),
+                                                             new SqlParameter("@IVA8", datos.IVA8),
+                                                             new SqlParameter("@IVA13", datos.IVA13)
+                                                             );
                                                     }
                                                     else
                                                     {
@@ -408,8 +430,68 @@ namespace WAConectorAPI.Controllers
             }
         }
 
+        [Route("api/Compras/RecuperacionIVAS")]
+        public async System.Threading.Tasks.Task<HttpResponseMessage> GetRealizarRecuperacionAsync([FromUri] Filtros filtro)
+        {
+            try
+            {
+                DateTime time = new DateTime();
+                if (filtro.FechaFinal != time)
+                {
+                    filtro.FechaFinal = filtro.FechaFinal.AddDays(1);
+
+                }
+
+                G g = new G();
+                var Compras = db.BandejaEntrada.Where(a => (filtro.FechaInicial != time ? a.FechaIngreso >= filtro.FechaInicial : true)
+                && (filtro.FechaFinal != time ? a.FechaIngreso <= filtro.FechaFinal : true)  && a.IVA1 == 0 && a.IVA2 == 0 && a.IVA4 == 0 && a.IVA8 == 0 && a.IVA13 == 0).Take(10).ToList();
+
+                foreach(var item in Compras)
+                {
+                    try
+                    {
+                        string texto = g.UnZip(item.XmlFactura);
+                        var datos = G.ObtenerDatosXmlRechazado(texto);
+                        db.Entry(item).State = EntityState.Modified;
+                        item.IVA1 = datos.IVA1;
+                        item.IVA2 = datos.IVA2;
+                        item.IVA4 = datos.IVA4;
+                        item.IVA8 = datos.IVA8;
+                        item.IVA13 = datos.IVA13;
+                        db.SaveChanges();
+                    }
+                    catch (Exception ex)
+                    {
+
+                        BitacoraErrores be = new BitacoraErrores();
+                        be.Descripcion = item.NumeroConsecutivo + " error -> "+ ex.Message;
+                        be.StackTrace = ex.StackTrace;
+
+                        be.Fecha = DateTime.Now;
+                        db.BitacoraErrores.Add(be);
+                        db.SaveChanges();
+                    }
+                  
+                }
+
+                return Request.CreateResponse(HttpStatusCode.OK);
+
+            }
+            catch (Exception ex)
+            {
+
+                BitacoraErrores be = new BitacoraErrores();
+                be.Descripcion = ex.Message;
+                be.StackTrace = ex.StackTrace;
+
+                be.Fecha = DateTime.Now;
+                db.BitacoraErrores.Add(be);
+                db.SaveChanges();
 
 
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, ex);
+            }
+        }
         [Route("api/Compras/Listado")]
         public async System.Threading.Tasks.Task<HttpResponseMessage> GetListado([FromUri] Filtros filtro)
         {
