@@ -166,6 +166,14 @@ namespace WAConectorAPI.Controllers
                     }
                     catch (Exception ex)
                     {
+                        BitacoraErrores be = new BitacoraErrores();
+                        be.DocNum = "";
+                        be.Type = "";
+                        be.Descripcion = ex.Message;
+                        be.StackTrace = ex.StackTrace;
+                        be.Fecha = DateTime.Now;
+                        db.BitacoraErrores.Add(be);
+                        db.SaveChanges();
                         return Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
 
                     }
