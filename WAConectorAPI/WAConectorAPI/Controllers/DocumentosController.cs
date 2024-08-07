@@ -307,7 +307,7 @@ namespace WAConectorAPI.Controllers
                     enc.moneda = Ds.Tables["Encabezado"].Rows[0]["Moneda"].ToString();
                     enc.tipoCambio = Convert.ToDecimal(Ds.Tables["Encabezado"].Rows[0]["TipoCambio"]);
                     enc.RefNumeroDocumento = Ds.Tables["Encabezado"].Rows[0]["Referencia"].ToString();
-                    enc.RefRazon = Ds.Tables["Encabezado"].Rows[0]["Comentario"].ToString();
+                    enc.RefRazon = Ds.Tables["Encabezado"].Rows[0]["Comentario"].ToString().Length > 180 ? Ds.Tables["Encabezado"].Rows[0]["Comentario"].ToString().Substring(0,180) : Ds.Tables["Encabezado"].Rows[0]["Comentario"].ToString();
                     enc.RefFechaEmision = DateTime.Now;
                     enc.procesadaHacienda = false;
                     try
