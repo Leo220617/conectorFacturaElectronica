@@ -208,6 +208,13 @@ namespace WAConectorAPI.Controllers
 
                     if (enc.TipoIdentificacion != null) //Es tiquete electronico
                     {
+                        var EmailEnviar = enc.Email;
+
+                        if(enc.Email.Contains(";"))
+                        {
+                            EmailEnviar = enc.Email.Split(';')[0];
+                        }
+
                         //Generacion del nodo de receptor
                         xml.receptor = new receptor();
                         xml.receptor.nombre = enc.CardName;
@@ -215,14 +222,14 @@ namespace WAConectorAPI.Controllers
                         if (enc.TipoIdentificacion == "EX")
                         // if(enc.LicTradNum.Length >= 12 && (enc.TipoDocumento == "09" || enc.TipoDocumento == "03" || enc.TipoDocumento == "02"))
                         {
-                            xml.receptor.correo_electronico = enc.Email;
+                            xml.receptor.correo_electronico = EmailEnviar;
                             xml.receptor.IdentificacionExtranjero = enc.LicTradNum;
                             xml.receptor.sennas_extranjero = "ninguna";
                         }
                         else
                         {
                             //Generacion del nodo hijo de receptor de identificacion
-                            xml.receptor.correo_electronico = enc.Email;
+                            xml.receptor.correo_electronico = EmailEnviar;
                             xml.receptor.telefono = new telefono();
                             xml.receptor.telefono.cod_pais = "506";
                             xml.receptor.telefono.numero = enc.Telefono;
