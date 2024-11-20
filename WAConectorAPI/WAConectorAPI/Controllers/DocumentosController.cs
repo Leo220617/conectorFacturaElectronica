@@ -20,6 +20,7 @@ namespace WAConectorAPI.Controllers
     public class DocumentosController : ApiController
     {
         ModelCliente db = new ModelCliente();
+        ModelCliente db2 = new ModelCliente();
         Metodos metodo = new Metodos();
 
         public async System.Threading.Tasks.Task<HttpResponseMessage> GetAsync([FromUri] string DocNum, string ObjType = "13", string CodSucursal = "001", bool ND = false)
@@ -1106,6 +1107,19 @@ namespace WAConectorAPI.Controllers
                             //product = await response.Content.ReadAsAsync<ListaOrdenes>();
 
                         }
+                        else
+                        {
+                            
+                            BitacoraErrores be = new BitacoraErrores();
+                            be.DocNum = DocNum;
+                            be.Type = ObjType;
+                            be.Descripcion = JsonConvert.SerializeObject(response);
+                            be.StackTrace = "Mandando XML a Hacienda";
+                            be.Fecha = DateTime.Now;
+                            db2.BitacoraErrores.Add(be);
+                            db2.SaveChanges();
+
+                        }
 
                     }
                     catch (Exception ex)
@@ -1116,8 +1130,8 @@ namespace WAConectorAPI.Controllers
                         be.Descripcion = ex.Message;
                         be.StackTrace = ex.StackTrace;
                         be.Fecha = DateTime.Now;
-                        db.BitacoraErrores.Add(be);
-                        db.SaveChanges();
+                        db2.BitacoraErrores.Add(be);
+                        db2.SaveChanges();
                     }
                 }
                 else
@@ -1292,6 +1306,7 @@ namespace WAConectorAPI.Controllers
             }
             catch (Exception ex)
             {
+               
                 try
                 {
                     t.Rollback();

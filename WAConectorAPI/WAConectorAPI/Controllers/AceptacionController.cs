@@ -29,13 +29,14 @@ namespace WAConectorAPI.Controllers
                 DateTime time = new DateTime();
                 //if (filtro.FechaFinal != time)
                 //{
-                //    filtro.FechaFinal = filtro.FechaFinal.AddDays(1);
-                    
+                //    filtro.FechaFinal = filtro.FechaFinal.AddHours(23).AddMinutes(58) ;
+
                 //}
-                
+
                 var Compras = db.BandejaEntrada.Select(a => new {
                     a.Id,
                     a.NumeroConsecutivo,
+                    a.TipoDocumento,
                     a.IdEmisor,
                     a.NombreEmisor,
                     a.FechaIngreso,
@@ -63,6 +64,7 @@ namespace WAConectorAPI.Controllers
                 && (!string.IsNullOrEmpty(filtro.Estado) ? (filtro.Estado != "NULL" ? a.Procesado == filtro.Estado  : true) : true)
                 && (filtro.Codigo1 > 0 ? a.idAceptador == filtro.Codigo1  : true)
                 && (filtro.CodMoneda != "NULL" && !string.IsNullOrEmpty(filtro.CodMoneda) ?  a.CodigoMoneda.Contains(filtro.CodMoneda) : true)
+                && (!string.IsNullOrEmpty(filtro.Texto) ? a.TipoDocumento == filtro.Texto : true)
                 ).ToList();
 
 

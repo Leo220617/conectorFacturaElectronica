@@ -499,7 +499,11 @@ namespace WAConectorAPI.Controllers
             {
                 DateTime time = new DateTime();
 
+                if (filtro.FechaFinal != time)
+                {
+                    filtro.FechaFinal = filtro.FechaFinal.AddHours(23).AddMinutes(58);
 
+                }
                 var Compras = db.BandejaEntrada.Where(a => (filtro.FechaInicial != time ? a.FechaIngreso >= filtro.FechaInicial : true)).ToList();
 
                 if (filtro.FechaFinal != time)
