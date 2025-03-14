@@ -55,6 +55,28 @@ namespace WAConectorAPI.Controllers
                         }
                 }
 
+                var RedondearACantidad = 0;
+                try
+                {
+                    RedondearACantidad = Convert.ToInt32(metodo.ObtenerConfig("CantidadRendodearA"));
+                }
+                catch (Exception)
+                {
+
+                    RedondearACantidad = 3;
+                }
+
+                var RedondearA = 0;
+                try
+                {
+                    RedondearA = Convert.ToInt32(metodo.ObtenerConfig("RendodearA"));
+                }
+                catch (Exception)
+                {
+
+                    RedondearA = 3;
+                }
+
                 var conexion = metodo.DevuelveCadena(CodSucursal);
 
                 SqlConnection Cn = new SqlConnection(conexion);

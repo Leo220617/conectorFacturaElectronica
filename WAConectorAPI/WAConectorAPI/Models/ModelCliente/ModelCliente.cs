@@ -37,6 +37,46 @@ namespace WAConectorAPI.Models.ModelCliente
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<DetDocumento>()
+        .Property(e => e.exportacion)
+        .HasPrecision(19, 6);
+
+            modelBuilder.Entity<DetDocumento>()
+       .Property(e => e.cantidad)
+       .HasPrecision(19, 6);
+
+            modelBuilder.Entity<DetDocumento>()
+                   .Property(e => e.PrecioUnitario)
+                   .HasPrecision(19, 6);
+            modelBuilder.Entity<DetDocumento>()
+                   .Property(e => e.MontoTotal)
+                   .HasPrecision(19, 6);
+            modelBuilder.Entity<DetDocumento>()
+                   .Property(e => e.MontoDescuento)
+                   .HasPrecision(19, 6);
+            modelBuilder.Entity<DetDocumento>()
+                   .Property(e => e.SubTotal)
+                   .HasPrecision(19, 6);
+            modelBuilder.Entity<DetDocumento>()
+                   .Property(e => e.baseImponible)
+                   .HasPrecision(19, 6);
+            modelBuilder.Entity<DetDocumento>()
+                   .Property(e => e.montoImpuesto)
+                   .HasPrecision(19, 6);
+            modelBuilder.Entity<DetDocumento>()
+                   .Property(e => e.factorIVA)
+                   .HasPrecision(19, 6);
+            modelBuilder.Entity<DetDocumento>()
+                   .Property(e => e.exonMonExo)
+                   .HasPrecision(19, 6);
+            modelBuilder.Entity<DetDocumento>()
+                   .Property(e => e.impNeto)
+                   .HasPrecision(19, 6);
+            modelBuilder.Entity<DetDocumento>()
+                   .Property(e => e.totalLinea)
+                   .HasPrecision(19, 6);
+
+
             modelBuilder.Entity<ConexionSAP>()
                 .Property(e => e.SQLUser)
                 .IsUnicode(false);
